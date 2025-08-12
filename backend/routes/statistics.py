@@ -53,10 +53,10 @@ def get_teaching_statistics():
                 pending_grading += 1
         
         # 获取考试统计
-         exams = Exam.query.filter_by(teacher_id=current_user.id).all()
-         for exam in exams:
-             if exam.status == 'submitted':
-                 pending_grading += 1
+        exams = Exam.query.filter_by(teacher_id=current_user.id).all()
+        for exam in exams:
+            if exam.status == 'submitted':
+                pending_grading += 1
         
         # 计算增长率（简化处理，实际应该与历史数据对比）
         student_growth = 5.2  # 模拟数据
