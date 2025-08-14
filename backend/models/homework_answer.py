@@ -33,8 +33,13 @@ class HomeworkAnswer:
     @staticmethod
     def create_table():
         """创建作业答案表"""
+        # 先删除现有表（如果存在）
+        drop_query = 'DROP TABLE IF EXISTS homework_answers'
+        db.execute_query(drop_query)
+        
+        # 创建新表
         query = '''
-        CREATE TABLE IF NOT EXISTS homework_answers (
+        CREATE TABLE homework_answers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             homework_id INTEGER NOT NULL,
             student_id INTEGER NOT NULL,

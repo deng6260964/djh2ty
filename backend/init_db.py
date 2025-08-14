@@ -22,8 +22,8 @@ def init_database():
     """初始化数据库表结构"""
     print("开始初始化数据库...")
     
-    # 创建数据库连接
-    db = Database()
+    # 创建数据库连接，指定正确的数据库路径
+    db = Database('database.db')
     
     try:
         # 创建所有表

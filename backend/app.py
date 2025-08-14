@@ -35,17 +35,21 @@ jwt = JWTManager(app)
 
 # 数据库初始化
 def init_db():
-    # 创建表
-    User.create_table()
-    Course.create_table()
-    CourseStudent.create_table()  # 创建课程学生关联表
-    Question.create_table()
-    Homework.create_table()
-    Exam.create_table()
-    Student.create_table()
-    HomeworkAnswer.create_table()  # 创建作业答案表
-    ExamAnswer.create_table()  # 创建考试答案表
-    # CourseManagement.create_table()  # 已被Course模型替代
+    # 按依赖顺序创建表
+    try:
+        User.create_table()
+        Student.create_table()
+        Course.create_table()
+        CourseStudent.create_table()  # 创建课程学生关联表
+        Question.create_table()
+        Homework.create_table()
+        Exam.create_table()
+        HomeworkAnswer.create_table()  # 创建作业答案表
+        ExamAnswer.create_table()  # 创建考试答案表
+        print("数据库初始化成功")
+    except Exception as e:
+        print(f"数据库初始化失败: {e}")
+        raise
 
 # 注册蓝图
 app.register_blueprint(auth_bp)

@@ -21,8 +21,13 @@ class Student:
     @classmethod
     def create_table(cls):
         """创建学生表"""
+        # 先删除现有表（如果存在）
+        drop_query = 'DROP TABLE IF EXISTS students'
+        db.execute_query(drop_query)
+        
+        # 创建新表
         query = '''
-            CREATE TABLE IF NOT EXISTS students (
+            CREATE TABLE students (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
                 student_number VARCHAR(50) UNIQUE,

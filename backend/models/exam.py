@@ -54,8 +54,13 @@ class Exam:
     @classmethod
     def create_table(cls):
         """创建考试表"""
+        # 先删除现有表（如果存在）
+        drop_query = 'DROP TABLE IF EXISTS exams'
+        db.execute_query(drop_query)
+        
+        # 创建新表
         query = '''
-            CREATE TABLE IF NOT EXISTS exams (
+            CREATE TABLE exams (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 teacher_id INTEGER NOT NULL,
                 student_id INTEGER NOT NULL,

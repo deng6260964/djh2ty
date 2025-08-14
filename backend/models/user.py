@@ -46,8 +46,13 @@ class User:
     @classmethod
     def create_table(cls):
         """创建用户表"""
+        # 先删除现有表（如果存在）
+        drop_query = 'DROP TABLE IF EXISTS users'
+        db.execute_query(drop_query)
+        
+        # 创建新表
         query = '''
-            CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 phone VARCHAR(20) UNIQUE NOT NULL,
                 password_hash VARCHAR(255) NOT NULL,

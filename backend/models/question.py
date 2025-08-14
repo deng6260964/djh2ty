@@ -48,8 +48,13 @@ class Question:
     @classmethod
     def create_table(cls):
         """创建题目表"""
+        # 先删除现有表（如果存在）
+        drop_query = 'DROP TABLE IF EXISTS questions'
+        db.execute_query(drop_query)
+        
+        # 创建新表
         query = '''
-            CREATE TABLE IF NOT EXISTS questions (
+            CREATE TABLE questions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 teacher_id INTEGER NOT NULL,
                 title VARCHAR(255) NOT NULL,
@@ -250,6 +255,15 @@ class Question:
     
     def to_dict(self):
         """转换为字典"""
+        # 安全解析JSON字符串
+        def safe_json_loads(value):
+            if isinstance(value, str) and value.strip():
+                try:
+                    return json.loads(value)
+                except (json.JSONDecodeError, ValueError):
+                    return None
+            return value
+        
         return {
             'id': self.id,
             'teacher_id': self.teacher_id,
@@ -258,8 +272,8 @@ class Question:
             'question_type': self.question_type,
             'difficulty': self.difficulty,
             'category': self.category,
-            'tags': json.loads(self.tags) if isinstance(self.tags, str) else self.tags,
-            'options': json.loads(self.options) if isinstance(self.options, str) else self.options,
+            'tags': safe_json_loads(self.tags),
+            'options': safe_json_loads(self.options),
             'correct_answer': self.correct_answer,
             'explanation': self.explanation,
             'points': self.points,

@@ -13,11 +13,18 @@ const showGenerateDialog = ref(false)
 const currentQuestion = ref<any>({})
 
 // Picker refs
-const typePickerRef = ref()
-const difficultyPickerRef = ref()
-const editTypePickerRef = ref()
-const editDifficultyPickerRef = ref()
-const generateDifficultyPickerRef = ref()
+const typePickerRef = ref(null)
+const difficultyPickerRef = ref(null)
+const editTypePickerRef = ref(null)
+const editDifficultyPickerRef = ref(null)
+const generateDifficultyPickerRef = ref(null)
+
+// Picker show states
+const showTypePicker = ref(false)
+const showDifficultyPicker = ref(false)
+const showEditTypePicker = ref(false)
+const showEditDifficultyPicker = ref(false)
+const showGenerateDifficultyPicker = ref(false)
 
 const formData = ref({
   content: '',
@@ -36,7 +43,8 @@ const generateData = ref({
 })
 
 const questionTypes = [
-  { text: '单选题', value: 'multiple_choice' },
+  { text: '单选题', value: 'single_choice' },
+  { text: '多选题', value: 'multiple_choice' },
   { text: '填空题', value: 'fill_blank' },
   { text: '简答题', value: 'short_answer' }
 ]
@@ -66,13 +74,16 @@ const loadQuestions = async () => {
 const openCreateDialog = () => {
   formData.value = {
     content: '',
-    type: 'multiple_choice',
+    type: 'single_choice',
     options: ['', '', '', ''],
     correct_answer: '',
     difficulty: 'medium',
     category: '',
     explanation: ''
   }
+  console.log('openCreateDialog - formData initialized:', formData.value)
+  console.log('getTypeText result:', getTypeText(formData.value.type))
+  console.log('getDifficultyText result:', getDifficultyText(formData.value.difficulty))
   showCreateDialog.value = true
 }
 
@@ -80,11 +91,11 @@ const openEditDialog = (question: any) => {
   currentQuestion.value = question
   formData.value = {
     content: question.title || question.content, // 优先使用title字段
-    type: question.type,
-    options: question.options || ['', '', '', ''],
-    correct_answer: question.correct_answer,
-    difficulty: question.difficulty,
-    category: question.category,
+    type: question.question_type || question.type,
+    options: Array.isArray(question.options) ? question.options : ['', '', '', ''],
+    correct_answer: question.correct_answer || '',
+    difficulty: question.difficulty || 'medium',
+    category: question.category || '',
     explanation: question.explanation || ''
   }
   showEditDialog.value = true
@@ -105,7 +116,7 @@ const createQuestion = async () => {
     // 将content字段映射为title字段
     data.title = data.content
     data.points = 10 // 设置默认分值
-    if (data.type !== 'multiple_choice') {
+    if (data.type !== 'single_choice') {
       delete data.options
     }
     await apiService.createQuestion(data)
@@ -122,7 +133,7 @@ const updateQuestion = async () => {
     const data: any = { ...formData.value }
     // 将content字段映射为title字段
     data.title = data.content
-    if (data.type !== 'multiple_choice') {
+    if (data.type !== 'single_choice') {
       delete data.options
     }
     await apiService.updateQuestion(currentQuestion.value.id, data)
@@ -152,11 +163,21 @@ const deleteQuestion = async (question: any) => {
       message: '确定要删除这道题目吗？',
     })
     
+    // 调试信息：检查题目ID
+    console.log('删除题目，题目数据:', question)
+    console.log('题目ID:', question.id)
+    
+    if (!question.id) {
+      showToast('题目ID不存在，无法删除')
+      return
+    }
+    
     await apiService.deleteQuestion(question.id)
     showToast('删除题目成功')
     loadQuestions()
   } catch (error) {
     if (error !== 'cancel') {
+      console.error('删除题目失败:', error)
       showToast('删除题目失败')
     }
   }
@@ -170,6 +191,34 @@ const getDifficultyText = (difficulty: string) => {
 const getTypeText = (type: string) => {
   const item = questionTypes.find(t => t.value === type)
   return item ? item.text : type
+}
+
+const onTypeConfirm = (value: any) => {
+  console.log('onTypeConfirm called with:', value)
+  console.log('formData before update:', formData.value)
+  formData.value.type = value.selectedOptions[0].value
+  console.log('formData after update:', formData.value)
+  console.log('getTypeText result:', getTypeText(formData.value.type))
+  showTypePicker.value = false
+}
+
+const onDifficultyConfirm = (value: any) => {
+  console.log('onDifficultyConfirm called with:', value)
+  console.log('formData before update:', formData.value)
+  formData.value.difficulty = value.selectedOptions[0].value
+  console.log('formData after update:', formData.value)
+  console.log('getDifficultyText result:', getDifficultyText(formData.value.difficulty))
+  showDifficultyPicker.value = false
+}
+
+const onEditTypeConfirm = (value: any) => {
+  formData.value.type = value.selectedOptions[0].value
+  showEditTypePicker.value = false
+}
+
+const onEditDifficultyConfirm = (value: any) => {
+  formData.value.difficulty = value.selectedOptions[0].value
+  showEditDifficultyPicker.value = false
 }
 
 const goBack = () => {
@@ -198,7 +247,7 @@ const goBack = () => {
             class="question-card"
           >
             <template #tags>
-              <van-tag type="primary">{{ getTypeText(question.type) }}</van-tag>
+              <van-tag type="primary">{{ getTypeText(question.question_type || question.type) }}</van-tag>
               <van-tag 
                 :type="question.difficulty === 'easy' ? 'success' : question.difficulty === 'medium' ? 'warning' : 'danger'"
 
@@ -212,7 +261,7 @@ const goBack = () => {
             </template>
             
             <template #desc>
-              <div v-if="question.type === 'multiple_choice' && question.options">
+              <div v-if="(question.question_type || question.type) === 'single_choice' && question.options">
                 <div v-for="(option, index) in question.options" :key="index" class="option">
                   {{ String.fromCharCode(65 + index) }}. {{ option }}
                 </div>
@@ -261,20 +310,20 @@ const goBack = () => {
           required
         />
         <van-field
-          v-model="formData.type"
+          :model-value="getTypeText(formData.type)"
           label="题目类型"
           placeholder="请选择题目类型"
           readonly
           is-link
-          @click="typePickerRef.open()"
+          @click="showTypePicker = true"
         />
         <van-field
-          v-model="formData.difficulty"
+          :model-value="getDifficultyText(formData.difficulty)"
           label="难度"
           placeholder="请选择难度"
           readonly
           is-link
-          @click="difficultyPickerRef.open()"
+          @click="showDifficultyPicker = true"
         />
         <van-field
           v-model="formData.category"
@@ -283,7 +332,7 @@ const goBack = () => {
         />
         
         <!-- 选择题选项 -->
-        <template v-if="formData.type === 'multiple_choice'">
+        <template v-if="formData.type === 'single_choice'">
           <van-field
             v-for="(option, index) in formData.options"
             :key="index"
@@ -308,17 +357,23 @@ const goBack = () => {
         />
       </van-form>
       
-      <!-- 选择器 -->
-      <van-picker
-        ref="typePickerRef"
-        :columns="questionTypes"
-        @confirm="(value) => { formData.type = value.value; typePickerRef.close() }"
-      />
-      <van-picker
-        ref="difficultyPickerRef"
-        :columns="difficulties"
-        @confirm="(value) => { formData.difficulty = value.value; difficultyPickerRef.close() }"
-      />
+      <!-- 选择器弹窗 -->
+      <van-popup v-model:show="showTypePicker" position="bottom">
+        <van-picker
+          :columns="questionTypes"
+          :default-index="questionTypes.findIndex(item => item.value === formData.type)"
+          @confirm="onTypeConfirm"
+          @cancel="showTypePicker = false"
+        />
+      </van-popup>
+      <van-popup v-model:show="showDifficultyPicker" position="bottom">
+        <van-picker
+          :columns="difficulties"
+          :default-index="difficulties.findIndex(item => item.value === formData.difficulty)"
+          @confirm="onDifficultyConfirm"
+          @cancel="showDifficultyPicker = false"
+        />
+      </van-popup>
     </van-dialog>
 
     <!-- 编辑题目弹窗 -->
@@ -339,20 +394,20 @@ const goBack = () => {
           required
         />
         <van-field
-          v-model="formData.type"
+          :model-value="getTypeText(formData.type)"
           label="题目类型"
           placeholder="请选择题目类型"
           readonly
           is-link
-          @click="editTypePickerRef.open()"
+          @click="showEditTypePicker = true"
         />
         <van-field
-          v-model="formData.difficulty"
+          :model-value="getDifficultyText(formData.difficulty)"
           label="难度"
           placeholder="请选择难度"
           readonly
           is-link
-          @click="editDifficultyPickerRef.open()"
+          @click="showEditDifficultyPicker = true"
         />
         <van-field
           v-model="formData.category"
@@ -361,7 +416,7 @@ const goBack = () => {
         />
         
         <!-- 选择题选项 -->
-        <template v-if="formData.type === 'multiple_choice'">
+        <template v-if="formData.type === 'single_choice'">
           <van-field
             v-for="(option, index) in formData.options"
             :key="index"
@@ -386,17 +441,23 @@ const goBack = () => {
         />
       </van-form>
       
-      <!-- 选择器 -->
-      <van-picker
-        ref="editTypePickerRef"
-        :columns="questionTypes"
-        @confirm="(value) => { formData.type = value.value; editTypePickerRef.close() }"
-      />
-      <van-picker
-        ref="editDifficultyPickerRef"
-        :columns="difficulties"
-        @confirm="(value) => { formData.difficulty = value.value; editDifficultyPickerRef.close() }"
-      />
+      <!-- 选择器弹窗 -->
+      <van-popup v-model:show="showEditTypePicker" position="bottom">
+        <van-picker
+          :columns="questionTypes"
+          :default-index="questionTypes.findIndex(item => item.value === formData.type)"
+          @confirm="onEditTypeConfirm"
+          @cancel="showEditTypePicker = false"
+        />
+      </van-popup>
+      <van-popup v-model:show="showEditDifficultyPicker" position="bottom">
+        <van-picker
+          :columns="difficulties"
+          :default-index="difficulties.findIndex(item => item.value === formData.difficulty)"
+          @confirm="onEditDifficultyConfirm"
+          @cancel="showEditDifficultyPicker = false"
+        />
+      </van-popup>
     </van-dialog>
 
     <!-- 自动生成题目弹窗 -->
@@ -414,12 +475,12 @@ const goBack = () => {
           required
         />
         <van-field
-          v-model="generateData.difficulty"
+          :model-value="getDifficultyText(generateData.difficulty)"
           label="难度"
           placeholder="请选择难度"
           readonly
           is-link
-          @click="generateDifficultyPickerRef.open()"
+          @click="showGenerateDifficultyPicker = true"
         />
         <van-field
           v-model="generateData.count"
@@ -430,11 +491,15 @@ const goBack = () => {
         />
       </van-form>
       
-      <van-picker
-        ref="generateDifficultyPickerRef"
-        :columns="difficulties"
-        @confirm="(value) => { generateData.difficulty = value.value; generateDifficultyPickerRef.close() }"
-      />
+      <!-- 选择器弹窗 -->
+      <van-popup v-model:show="showGenerateDifficultyPicker" position="bottom">
+        <van-picker
+          :columns="difficulties"
+          :default-index="difficulties.findIndex(item => item.value === generateData.difficulty)"
+          @confirm="(value) => { generateData.difficulty = value.value; showGenerateDifficultyPicker = false }"
+          @cancel="showGenerateDifficultyPicker = false"
+        />
+      </van-popup>
     </van-dialog>
   </div>
 </template>

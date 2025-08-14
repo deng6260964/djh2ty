@@ -39,8 +39,13 @@ class Course:
     @classmethod
     def create_table(cls):
         """创建课程表"""
+        # 先删除现有表（如果存在）
+        drop_query = 'DROP TABLE IF EXISTS courses'
+        db.execute_query(drop_query)
+        
+        # 创建新表
         query = '''
-            CREATE TABLE IF NOT EXISTS courses (
+            CREATE TABLE courses (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 teacher_id INTEGER NOT NULL,
                 title VARCHAR(255) NOT NULL,

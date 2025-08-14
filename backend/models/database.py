@@ -71,4 +71,4 @@ class Database:
             return cursor.rowcount
 
 # 全局数据库实例
-db = Database()
+db = Database('database.db')

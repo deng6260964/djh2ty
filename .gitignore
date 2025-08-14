@@ -78,3 +78,43 @@ coverage.xml
 *.rar
 *.tar
 *.zip
+
+# Editor backup files
+*~
+*.bak
+*.orig
+
+# Test files
+.nyc_output/
+.jest/
+
+# Lock files (optional, uncomment if needed)
+# package-lock.json
+# yarn.lock
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity

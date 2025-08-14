@@ -1,28 +1,116 @@
 <template>
-  <div class="min-h-screen bg-gray-50 p-6">
+  <div class="min-h-screen bg-gray-50 p-3 md:p-6">
     <div class="max-w-7xl mx-auto">
       <!-- 页面标题 -->
-      <div class="mb-8">
+      <div class="mb-6 md:mb-8">
         <div class="flex items-center mb-4">
           <button
             @click="goBack"
-            class="mr-4 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors flex items-center"
+            class="mr-3 md:mr-4 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors flex items-center"
             title="返回"
           >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
             </svg>
           </button>
           <div>
-            <h1 class="text-3xl font-bold text-gray-900">课程表</h1>
-            <p class="mt-2 text-gray-600">按周/月视图展示课程安排</p>
+            <h1 class="text-xl md:text-3xl font-bold text-gray-900">课程表</h1>
+            <p class="mt-1 md:mt-2 text-sm md:text-base text-gray-600">按周/月视图展示课程安排</p>
           </div>
         </div>
       </div>
 
       <!-- 操作栏 -->
-      <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-        <div class="flex justify-between items-center">
+      <div class="bg-white rounded-lg shadow-sm p-3 md:p-6 mb-4 md:mb-6">
+        <!-- 移动端布局 -->
+        <div class="block md:hidden space-y-3">
+          <!-- 第一行：创建和刷新按钮 -->
+          <div class="flex space-x-2">
+            <button
+              @click="openCreateDialog"
+              class="flex-1 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center text-sm"
+            >
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              创建课程
+            </button>
+            <button
+              @click="loadCourses"
+              class="bg-gray-100 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-200 transition-colors flex items-center text-sm"
+            >
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+              刷新
+            </button>
+          </div>
+          
+          <!-- 第二行：视图切换 -->
+          <div class="flex bg-gray-100 rounded-md p-1">
+            <button
+              @click="currentView = 'week'"
+              :class="[
+                'flex-1 py-2 rounded text-sm font-medium transition-colors text-center',
+                currentView === 'week'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              ]"
+            >
+              周视图
+            </button>
+            <button
+              @click="currentView = 'month'"
+              :class="[
+                'flex-1 py-2 rounded text-sm font-medium transition-colors text-center',
+                currentView === 'month'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              ]"
+            >
+              月视图
+            </button>
+          </div>
+          
+          <!-- 第三行：日期导航 -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-1">
+              <button
+                @click="navigateDate(-1)"
+                class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+              </button>
+              <span class="text-sm font-semibold text-gray-900 flex-1 text-center px-2">
+                {{ currentPeriod }}
+              </span>
+              <button
+                @click="navigateDate(1)"
+                class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            </div>
+            <button
+              @click="goToToday"
+              class="px-3 py-1 text-xs bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors"
+            >
+              今天
+            </button>
+          </div>
+          
+          <!-- 课程数量 -->
+          <div class="text-xs text-gray-500 text-center">
+            共 {{ courses.length }} 门课程
+          </div>
+        </div>
+        
+        <!-- 桌面端布局 -->
+        <div class="hidden md:flex justify-between items-center">
           <div class="flex space-x-4">
             <button
               @click="openCreateDialog"
@@ -113,96 +201,198 @@
       <!-- 日历视图 -->
       <div v-else class="bg-white rounded-lg shadow-sm overflow-hidden">
         <!-- 周视图 -->
-        <div v-if="currentView === 'week'" class="p-6">
-          <div class="grid grid-cols-8 gap-1">
-            <!-- 时间轴 -->
-            <div class="text-center text-sm font-medium text-gray-500 py-2">时间</div>
-            <div v-for="day in weekDays" :key="day.date" class="text-center">
-              <div class="text-sm font-medium text-gray-900">{{ day.name }}</div>
-              <div class="text-xs text-gray-500">{{ day.date }}</div>
-            </div>
-            
-            <!-- 时间段 -->
-            <template v-for="hour in timeSlots" :key="hour">
-              <div class="text-xs text-gray-500 py-2 text-right pr-2">{{ hour }}:00</div>
-              <div v-for="day in weekDays" :key="`${day.date}-${hour}`" 
-                   class="border border-gray-100 min-h-[60px] relative hover:bg-gray-50 cursor-pointer"
-                   @click="createCourseAtTime(day.date, hour)">
-                <!-- 课程卡片 -->
-                <div v-for="course in getCoursesForDayHour(day.date, hour)" 
-                     :key="course.id"
-                     :class="[
-                       'absolute inset-1 rounded p-2 text-xs cursor-pointer transition-all hover:shadow-md group',
-                       getCourseColor(course.subject)
-                     ]"
-                     @click.stop="openCourseDetail(course)">
-                  <div class="font-medium truncate">{{ course.title }}</div>
-                  <div class="text-xs opacity-75 truncate">{{ course.subject }}</div>
-                  <div class="text-xs opacity-75">{{ formatTime(course.start_time) }}-{{ formatTime(course.end_time) }}</div>
-                  <!-- 删除按钮 -->
-                  <button
-                    @click.stop="deleteCourse(course)"
-                    class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-600"
-                    title="删除课程"
-                  >
-                    <svg class="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                  </button>
+        <div v-if="currentView === 'week'" class="p-2 md:p-6">
+          <!-- 移动端周视图 -->
+          <div class="block md:hidden">
+            <div class="space-y-4">
+              <div v-for="day in weekDays" :key="day.date" class="border border-gray-200 rounded-lg p-3">
+                <div class="text-center mb-3">
+                  <div class="text-sm font-medium text-gray-900">{{ day.name }}</div>
+                  <div class="text-xs text-gray-500">{{ day.date }}</div>
+                </div>
+                <div class="space-y-2">
+                  <div v-for="hour in timeSlots" :key="hour" class="flex items-start space-x-2">
+                    <div class="text-xs text-gray-500 w-12 flex-shrink-0 pt-1">{{ hour }}:00</div>
+                    <div class="flex-1 min-h-[40px] border border-gray-100 rounded p-1 hover:bg-gray-50 cursor-pointer"
+                         @click="createCourseAtTime(day.date, hour)">
+                      <!-- 课程卡片 -->
+                      <div v-for="course in getCoursesForDayHour(day.date, hour)" 
+                           :key="course.id"
+                           :class="[
+                             'p-2 rounded text-xs cursor-pointer transition-all hover:shadow-md group relative',
+                             getCourseColor(course.subject)
+                           ]"
+                           @click.stop="openCourseDetail(course)">
+                        <div class="font-medium truncate">{{ course.title }}</div>
+                        <div class="text-xs opacity-75 truncate">{{ course.subject }}</div>
+                        <div class="text-xs opacity-75">{{ formatTime(course.start_time) }}-{{ formatTime(course.end_time) }}</div>
+                        <!-- 删除按钮 -->
+                        <button
+                          @click.stop="deleteCourse(course)"
+                          class="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-600"
+                          title="删除课程"
+                        >
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </template>
+            </div>
+          </div>
+          
+          <!-- 桌面端周视图 -->
+          <div class="hidden md:block">
+            <div class="grid grid-cols-8 gap-1">
+              <!-- 时间轴 -->
+              <div class="text-center text-sm font-medium text-gray-500 py-2">时间</div>
+              <div v-for="day in weekDays" :key="day.date" class="text-center">
+                <div class="text-sm font-medium text-gray-900">{{ day.name }}</div>
+                <div class="text-xs text-gray-500">{{ day.date }}</div>
+              </div>
+              
+              <!-- 时间段 -->
+              <template v-for="hour in timeSlots" :key="hour">
+                <div class="text-xs text-gray-500 py-2 text-right pr-2">{{ hour }}:00</div>
+                <div v-for="day in weekDays" :key="`${day.date}-${hour}`" 
+                     class="border border-gray-100 min-h-[60px] relative hover:bg-gray-50 cursor-pointer"
+                     @click="createCourseAtTime(day.date, hour)">
+                  <!-- 课程卡片 -->
+                  <div v-for="course in getCoursesForDayHour(day.date, hour)" 
+                       :key="course.id"
+                       :class="[
+                         'absolute inset-1 rounded p-2 text-xs cursor-pointer transition-all hover:shadow-md group',
+                         getCourseColor(course.subject)
+                       ]"
+                       @click.stop="openCourseDetail(course)">
+                    <div class="font-medium truncate">{{ course.title }}</div>
+                    <div class="text-xs opacity-75 truncate">{{ course.subject }}</div>
+                    <div class="text-xs opacity-75">{{ formatTime(course.start_time) }}-{{ formatTime(course.end_time) }}</div>
+                    <!-- 删除按钮 -->
+                    <button
+                      @click.stop="deleteCourse(course)"
+                      class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-600"
+                      title="删除课程"
+                    >
+                      <svg class="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </template>
+            </div>
           </div>
         </div>
 
         <!-- 月视图 -->
-        <div v-if="currentView === 'month'" class="p-6">
-          <div class="grid grid-cols-7 gap-1">
-            <!-- 星期标题 -->
-            <div v-for="dayName in ['周日', '周一', '周二', '周三', '周四', '周五', '周六']" 
-                 :key="dayName" 
-                 class="text-center text-sm font-medium text-gray-500 py-2">
-              {{ dayName }}
-            </div>
-            
-            <!-- 日期格子 -->
-            <div v-for="day in monthDays" 
-                 :key="day.date" 
-                 :class="[
-                   'border border-gray-100 min-h-[120px] p-2 cursor-pointer hover:bg-gray-50',
-                   day.isCurrentMonth ? 'bg-white' : 'bg-gray-50',
-                   day.isToday ? 'bg-blue-50 border-blue-200' : ''
-                 ]"
-                 @click="createCourseAtDate(day.date)">
-              <div :class="[
-                'text-sm font-medium mb-1',
-                day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400',
-                day.isToday ? 'text-blue-600' : ''
-              ]">
-                {{ day.day }}
+        <div v-if="currentView === 'month'" class="p-2 md:p-6">
+          <!-- 移动端月视图 -->
+          <div class="block md:hidden">
+            <div class="grid grid-cols-7 gap-1 text-xs">
+              <!-- 星期标题 -->
+              <div v-for="dayName in ['日', '一', '二', '三', '四', '五', '六']" 
+                   :key="dayName" 
+                   class="text-center text-xs font-medium text-gray-500 py-1">
+                {{ dayName }}
               </div>
               
-              <!-- 课程列表 -->
-              <div class="space-y-1">
-                <div v-for="course in getCoursesForDate(day.date)" 
-                     :key="course.id"
-                     :class="[
-                       'text-xs p-1 rounded cursor-pointer truncate transition-all hover:shadow-sm relative group',
-                       getCourseColor(course.subject)
-                     ]"
-                     @click.stop="openCourseDetail(course)"
-                     :title="`${course.title} - ${formatTime(course.start_time)}`">
-                  {{ course.title }}
-                  <!-- 删除按钮 -->
-                  <button
-                    @click.stop="deleteCourse(course)"
-                    class="absolute top-0 right-0 w-3 h-3 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-600"
-                    title="删除课程"
-                  >
-                    <svg class="w-1.5 h-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                  </button>
+              <!-- 日期格子 -->
+              <div v-for="day in monthDays" 
+                   :key="day.date" 
+                   :class="[
+                     'border border-gray-100 min-h-[80px] p-1 cursor-pointer hover:bg-gray-50',
+                     day.isCurrentMonth ? 'bg-white' : 'bg-gray-50',
+                     day.isToday ? 'bg-blue-50 border-blue-200' : ''
+                   ]"
+                   @click="createCourseAtDate(day.date)">
+                <div :class="[
+                  'text-xs font-medium mb-1',
+                  day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400',
+                  day.isToday ? 'text-blue-600' : ''
+                ]">
+                  {{ day.day }}
+                </div>
+                
+                <!-- 课程列表 -->
+                <div class="space-y-1">
+                  <div v-for="course in getCoursesForDate(day.date)" 
+                       :key="course.id"
+                       :class="[
+                         'text-xs p-1 rounded cursor-pointer truncate transition-all hover:shadow-sm relative group',
+                         getCourseColor(course.subject)
+                       ]"
+                       @click.stop="openCourseDetail(course)"
+                       :title="`${course.title} - ${formatTime(course.start_time)}`">
+                    {{ course.title.length > 6 ? course.title.substring(0, 6) + '...' : course.title }}
+                    <!-- 删除按钮 -->
+                    <button
+                      @click.stop="deleteCourse(course)"
+                      class="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-600"
+                      title="删除课程"
+                    >
+                      <svg class="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 桌面端月视图 -->
+          <div class="hidden md:block">
+            <div class="grid grid-cols-7 gap-1">
+              <!-- 星期标题 -->
+              <div v-for="dayName in ['周日', '周一', '周二', '周三', '周四', '周五', '周六']" 
+                   :key="dayName" 
+                   class="text-center text-sm font-medium text-gray-500 py-2">
+                {{ dayName }}
+              </div>
+              
+              <!-- 日期格子 -->
+              <div v-for="day in monthDays" 
+                   :key="day.date" 
+                   :class="[
+                     'border border-gray-100 min-h-[120px] p-2 cursor-pointer hover:bg-gray-50',
+                     day.isCurrentMonth ? 'bg-white' : 'bg-gray-50',
+                     day.isToday ? 'bg-blue-50 border-blue-200' : ''
+                   ]"
+                   @click="createCourseAtDate(day.date)">
+                <div :class="[
+                  'text-sm font-medium mb-1',
+                  day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400',
+                  day.isToday ? 'text-blue-600' : ''
+                ]">
+                  {{ day.day }}
+                </div>
+                
+                <!-- 课程列表 -->
+                <div class="space-y-1">
+                  <div v-for="course in getCoursesForDate(day.date)" 
+                       :key="course.id"
+                       :class="[
+                         'text-xs p-1 rounded cursor-pointer truncate transition-all hover:shadow-sm relative group',
+                         getCourseColor(course.subject)
+                       ]"
+                       @click.stop="openCourseDetail(course)"
+                       :title="`${course.title} - ${formatTime(course.start_time)}`">
+                    {{ course.title }}
+                    <!-- 删除按钮 -->
+                    <button
+                      @click.stop="deleteCourse(course)"
+                      class="absolute top-0 right-0 w-3 h-3 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-600"
+                      title="删除课程"
+                    >
+                      <svg class="w-1.5 h-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1058,6 +1248,63 @@ const enrollStudentsToCourse = async (courseId: number, studentIds: number[]) =>
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* 移动端优化样式 */
+@media (max-width: 768px) {
+  /* 确保按钮有足够的触摸区域 */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* 优化小屏幕上的文字大小 */
+  .text-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+  
+  /* 移动端课程卡片优化 */
+  .course-card-mobile {
+    padding: 8px;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.3;
+  }
+  
+  /* 移动端日期格子优化 */
+  .mobile-day-cell {
+    min-height: 80px;
+    padding: 4px;
+  }
+  
+  /* 移动端时间槽优化 */
+  .mobile-time-slot {
+    min-height: 40px;
+    padding: 4px;
+  }
+  
+  /* 优化移动端滚动 */
+  .mobile-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* 移动端操作按钮组 */
+  .mobile-action-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  /* 移动端导航按钮 */
+  .mobile-nav-button {
+    padding: 12px;
+    border-radius: 8px;
+    min-width: 48px;
+    min-height: 48px;
   }
 }
 
