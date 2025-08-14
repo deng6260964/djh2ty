@@ -10,7 +10,7 @@ course_management_bp = Blueprint('course_management', __name__)
 def get_courses():
     """获取课程列表"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.find_by_id(current_user_id)
         
         if not user:
@@ -36,7 +36,7 @@ def get_courses():
 def create_course():
     """创建课程"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.find_by_id(current_user_id)
         
         if not user:
@@ -81,7 +81,7 @@ def create_course():
 def get_course(course_id):
     """获取课程详情"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.find_by_id(current_user_id)
         
         if not user:
@@ -108,7 +108,7 @@ def get_course(course_id):
 def update_course(course_id):
     """更新课程"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.find_by_id(current_user_id)
         
         if not user:
@@ -157,7 +157,7 @@ def update_course(course_id):
 def delete_course(course_id):
     """删除课程"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.find_by_id(current_user_id)
         
         if not user:

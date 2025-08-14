@@ -64,12 +64,32 @@ const quickActions = [
 // 获取统计数据
 const fetchStatistics = async () => {
   try {
+    // 检查是否有token
+    const token = localStorage.getItem('token')
+    if (!token) {
+      window.location.href = '/login'
+      return
+    }
+    
     const response = await apiService.getTeachingStatistics()
+    
     if (response.success && response.data) {
-      Object.assign(statistics, response.data)
+      // 映射后端字段到前端字段
+      statistics.totalStudents = response.data.total_students || 0
+      statistics.totalCourses = response.data.total_courses || 0
+      statistics.totalQuestions = response.data.total_questions || 0
+      statistics.totalAssignments = response.data.total_homeworks || 0
+      statistics.pendingGrading = response.data.pending_grading || 0
     }
   } catch (error) {
     console.error('获取统计数据失败:', error)
+    
+    // 如果是认证错误，清除token并跳转到登录页
+    if (error.response?.status === 401 || error.response?.status === 422) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user_info')
+      window.location.href = '/login'
+    }
   }
 }
 
