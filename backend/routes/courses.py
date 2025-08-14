@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import json
 
 from models.course import Course
+from models.course_student import CourseStudent
 from models.user import User
 from models.database import db
 
@@ -22,7 +23,7 @@ def validate_datetime(date_string):
 def get_courses():
     """获取课程列表"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -33,7 +34,6 @@ def get_courses():
             }), 404
         
         # 获取查询参数
-        status = request.args.get('status')
         start_date = request.args.get('start_date')
         end_date = request.args.get('end_date')
         page = int(request.args.get('page', 1))
@@ -56,9 +56,16 @@ def get_courses():
         
         # 根据用户角色获取课程
         if user.role == 'teacher':
-            courses = Course.get_by_teacher(user_id, status, start_date, end_date)
+            courses = Course.get_by_teacher(user_id, start_date, end_date)
         else:
-            courses = Course.get_by_student(user_id, status, start_date, end_date)
+            # 学生通过课程学生关联表获取课程
+            enrollments = CourseStudent.get_by_student(user_id)
+            course_ids = [e.course_id for e in enrollments]
+            courses = []
+            for course_id in course_ids:
+                course = Course.find_by_id(course_id)
+                if course:
+                    courses.append(course)
         
         # 分页处理
         total = len(courses)
@@ -66,12 +73,13 @@ def get_courses():
         end_idx = start_idx + limit
         paginated_courses = courses[start_idx:end_idx]
         
-        # 获取详细信息
+        # 转换为字典格式
         course_list = []
         for course in paginated_courses:
-            course_detail = Course.get_course_with_details(course.id)
-            if course_detail:
-                course_list.append(course_detail.to_dict())
+            course_dict = course.to_dict()
+            # 添加报名人数信息
+            course_dict['enrolled_count'] = CourseStudent.get_enrollment_count(course.id)
+            course_list.append(course_dict)
         
         return jsonify({
             'success': True,
@@ -98,7 +106,7 @@ def get_courses():
 def get_course(course_id):
     """获取课程详情"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -108,7 +116,7 @@ def get_course(course_id):
                 'code': 'USER_NOT_FOUND'
             }), 404
         
-        course = Course.get_course_with_details(course_id)
+        course = Course.find_by_id(course_id)
         if not course:
             return jsonify({
                 'success': False,
@@ -124,17 +132,24 @@ def get_course(course_id):
                 'code': 'ACCESS_DENIED'
             }), 403
         
-        if user.role == 'student' and course.student_id != user_id:
+        if user.role == 'student' and not CourseStudent.is_enrolled(course_id, user_id):
             return jsonify({
                 'success': False,
                 'message': '无权访问此课程',
                 'code': 'ACCESS_DENIED'
             }), 403
         
+        course_dict = course.to_dict()
+        # 添加报名学生信息
+        if user.role == 'teacher':
+            enrollments = CourseStudent.get_by_course(course_id)
+            course_dict['students'] = [e.to_dict() for e in enrollments]
+        course_dict['enrolled_count'] = CourseStudent.get_enrollment_count(course_id)
+        
         return jsonify({
             'success': True,
             'data': {
-                'course': course.to_dict()
+                'course': course_dict
             }
         })
         
@@ -150,7 +165,7 @@ def get_course(course_id):
 def create_course():
     """创建课程"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -170,8 +185,8 @@ def create_course():
         
         data = request.get_json()
         
-        # 验证必填字段（适配前端课程管理）
-        required_fields = ['name', 'grade']
+        # 验证必填字段
+        required_fields = ['title', 'subject', 'level', 'start_time', 'end_time']
         for field in required_fields:
             if not data.get(field):
                 return jsonify({
@@ -180,19 +195,37 @@ def create_course():
                     'code': 'MISSING_FIELD'
                 }), 400
         
-        # 创建课程（适配课程管理模式）
+        # 验证时间格式
+        if not validate_datetime(data['start_time']) or not validate_datetime(data['end_time']):
+            return jsonify({
+                'success': False,
+                'message': '时间格式不正确',
+                'code': 'INVALID_DATETIME'
+            }), 400
+        
+        # 验证时间逻辑
+        start_time = datetime.fromisoformat(data['start_time'].replace('Z', '+00:00'))
+        end_time = datetime.fromisoformat(data['end_time'].replace('Z', '+00:00'))
+        
+        if start_time >= end_time:
+            return jsonify({
+                'success': False,
+                'message': '开始时间必须早于结束时间',
+                'code': 'INVALID_TIME_RANGE'
+            }), 400
+        
+        # 创建课程
         course = Course(
             teacher_id=user_id,
-            student_id=None,  # 课程管理模式下不绑定特定学生
-            title=data['name'],  # 使用name作为title
+            title=data['title'],
+            subject=data['subject'],
+            level=data['level'],
+            start_time=data['start_time'],
+            end_time=data['end_time'],
+            location=data.get('location', ''),
+            max_students=data.get('max_students', 30),
             description=data.get('description', ''),
-            start_time=None,  # 课程管理模式下不设置具体时间
-            end_time=None,
-            location='',
-            notes=f"年级: {data['grade']}, 科目: {data.get('subject', 'English')}",
-            status='active',  # 课程管理模式下默认为active
-            grade=data['grade'],
-            subject=data.get('subject', 'English')
+            status='active'
         )
         course.save()
         
@@ -214,7 +247,7 @@ def create_course():
 def update_course(course_id):
     """更新课程"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -240,19 +273,17 @@ def update_course(course_id):
                 'code': 'PERMISSION_DENIED'
             }), 403
         
-        # 已完成或已取消的课程不能修改
-        if course.status in ['completed', 'cancelled']:
-            return jsonify({
-                'success': False,
-                'message': '已完成或已取消的课程不能修改',
-                'code': 'COURSE_IMMUTABLE'
-            }), 400
-        
         data = request.get_json()
         
         # 更新允许的字段
         if 'title' in data and data['title']:
             course.title = data['title']
+        
+        if 'subject' in data and data['subject']:
+            course.subject = data['subject']
+        
+        if 'level' in data and data['level']:
+            course.level = data['level']
         
         if 'description' in data:
             course.description = data['description']
@@ -260,8 +291,8 @@ def update_course(course_id):
         if 'location' in data:
             course.location = data['location']
         
-        if 'notes' in data:
-            course.notes = data['notes']
+        if 'max_students' in data:
+            course.max_students = data['max_students']
         
         # 更新时间（需要验证）
         if 'start_time' in data or 'end_time' in data:
@@ -275,7 +306,10 @@ def update_course(course_id):
                     'code': 'INVALID_DATETIME'
                 }), 400
             
-            if start_time >= end_time:
+            start_dt = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
+            end_dt = datetime.fromisoformat(end_time.replace('Z', '+00:00'))
+            
+            if start_dt >= end_dt:
                 return jsonify({
                     'success': False,
                     'message': '开始时间必须早于结束时间',
@@ -288,14 +322,11 @@ def update_course(course_id):
         # 保存更新
         course.save()
         
-        # 获取详细信息
-        course_detail = Course.get_course_with_details(course.id)
-        
         return jsonify({
             'success': True,
             'message': '课程更新成功',
             'data': {
-                'course': course_detail.to_dict() if course_detail else course.to_dict()
+                'course': course.to_dict()
             }
         })
         
@@ -311,7 +342,7 @@ def update_course(course_id):
 def delete_course(course_id):
     """删除课程"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -337,15 +368,7 @@ def delete_course(course_id):
                 'code': 'PERMISSION_DENIED'
             }), 403
         
-        # 已开始的课程不能删除，只能取消
-        if course.status == 'in_progress':
-            return jsonify({
-                'success': False,
-                'message': '正在进行的课程不能删除，请先取消课程',
-                'code': 'COURSE_IN_PROGRESS'
-            }), 400
-        
-        # 删除课程
+        # 删除课程（关联的学生记录会通过外键约束自动删除）
         course.delete()
         
         return jsonify({
@@ -360,12 +383,12 @@ def delete_course(course_id):
             'code': 'DELETE_COURSE_ERROR'
         }), 500
 
-@courses_bp.route('/<int:course_id>/start', methods=['POST'])
+@courses_bp.route('/<int:course_id>/enroll', methods=['POST'])
 @jwt_required()
-def start_course(course_id):
-    """开始课程"""
+def enroll_course(course_id):
+    """报名课程"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -375,6 +398,14 @@ def start_course(course_id):
                 'code': 'USER_NOT_FOUND'
             }), 404
         
+        # 只有学生可以报名课程
+        if user.role != 'student':
+            return jsonify({
+                'success': False,
+                'message': '只有学生可以报名课程',
+                'code': 'PERMISSION_DENIED'
+            }), 403
+        
         course = Course.find_by_id(course_id)
         if not course:
             return jsonify({
@@ -383,44 +414,51 @@ def start_course(course_id):
                 'code': 'COURSE_NOT_FOUND'
             }), 404
         
-        # 只有教师可以开始课程
-        if user.role != 'teacher' or course.teacher_id != user_id:
+        # 检查是否已报名
+        if CourseStudent.is_enrolled(course_id, user_id):
             return jsonify({
                 'success': False,
-                'message': '无权开始此课程',
-                'code': 'PERMISSION_DENIED'
-            }), 403
-        
-        # 开始课程
-        if course.start():
-            course_detail = Course.get_course_with_details(course.id)
-            return jsonify({
-                'success': True,
-                'message': '课程已开始',
-                'data': {
-                    'course': course_detail.to_dict() if course_detail else course.to_dict()
-                }
-            })
-        else:
-            return jsonify({
-                'success': False,
-                'message': '无法开始课程，请检查课程状态和时间',
-                'code': 'CANNOT_START_COURSE'
+                'message': '您已报名此课程',
+                'code': 'ALREADY_ENROLLED'
             }), 400
+        
+        # 检查课程是否已满
+        enrolled_count = CourseStudent.get_enrollment_count(course_id)
+        if enrolled_count >= course.max_students:
+            return jsonify({
+                'success': False,
+                'message': '课程已满，无法报名',
+                'code': 'COURSE_FULL'
+            }), 400
+        
+        # 创建报名记录
+        enrollment = CourseStudent(
+            course_id=course_id,
+            student_id=user_id,
+            enrollment_date=datetime.now().isoformat(),
+            status='enrolled'
+        )
+        enrollment.save()
+        
+        return jsonify({
+            'success': True,
+            'message': '报名成功',
+            'data': enrollment.to_dict()
+        })
         
     except Exception as e:
         return jsonify({
             'success': False,
-            'message': f'开始课程失败: {str(e)}',
-            'code': 'START_COURSE_ERROR'
+            'message': f'报名失败: {str(e)}',
+            'code': 'ENROLL_ERROR'
         }), 500
 
-@courses_bp.route('/<int:course_id>/complete', methods=['POST'])
+@courses_bp.route('/<int:course_id>/drop', methods=['POST'])
 @jwt_required()
-def complete_course(course_id):
-    """完成课程"""
+def drop_course(course_id):
+    """退课"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -430,55 +468,55 @@ def complete_course(course_id):
                 'code': 'USER_NOT_FOUND'
             }), 404
         
-        course = Course.find_by_id(course_id)
-        if not course:
+        # 只有学生可以退课
+        if user.role != 'student':
             return jsonify({
                 'success': False,
-                'message': '课程不存在',
-                'code': 'COURSE_NOT_FOUND'
-            }), 404
-        
-        # 只有教师可以完成课程
-        if user.role != 'teacher' or course.teacher_id != user_id:
-            return jsonify({
-                'success': False,
-                'message': '无权完成此课程',
+                'message': '只有学生可以退课',
                 'code': 'PERMISSION_DENIED'
             }), 403
         
-        data = request.get_json() or {}
-        summary = data.get('summary', '')
+        # 检查是否已报名
+        if not CourseStudent.is_enrolled(course_id, user_id):
+            return jsonify({
+                'success': False,
+                'message': '您未报名此课程',
+                'code': 'NOT_ENROLLED'
+            }), 400
         
-        # 完成课程
-        if course.complete(summary):
-            course_detail = Course.get_course_with_details(course.id)
+        # 查找报名记录并更新状态
+        query = 'SELECT * FROM course_students WHERE course_id = ? AND student_id = ? AND status = "enrolled"'
+        result = db.execute_query(query, (course_id, user_id))
+        
+        if result:
+            enrollment = CourseStudent.from_dict(dict(result[0]))
+            enrollment.status = 'dropped'
+            enrollment.save()
+            
             return jsonify({
                 'success': True,
-                'message': '课程已完成',
-                'data': {
-                    'course': course_detail.to_dict() if course_detail else course.to_dict()
-                }
+                'message': '退课成功'
             })
         else:
             return jsonify({
                 'success': False,
-                'message': '无法完成课程，请检查课程状态',
-                'code': 'CANNOT_COMPLETE_COURSE'
-            }), 400
+                'message': '未找到报名记录',
+                'code': 'ENROLLMENT_NOT_FOUND'
+            }), 404
         
     except Exception as e:
         return jsonify({
             'success': False,
-            'message': f'完成课程失败: {str(e)}',
-            'code': 'COMPLETE_COURSE_ERROR'
+            'message': f'退课失败: {str(e)}',
+            'code': 'DROP_ERROR'
         }), 500
 
-@courses_bp.route('/<int:course_id>/cancel', methods=['POST'])
+@courses_bp.route('/<int:course_id>/enroll-students', methods=['POST'])
 @jwt_required()
-def cancel_course(course_id):
-    """取消课程"""
+def enroll_students_to_course(course_id):
+    """教师为学生批量报名课程"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -488,6 +526,14 @@ def cancel_course(course_id):
                 'code': 'USER_NOT_FOUND'
             }), 404
         
+        # 只有教师可以为学生报名
+        if user.role != 'teacher':
+            return jsonify({
+                'success': False,
+                'message': '只有教师可以为学生报名课程',
+                'code': 'PERMISSION_DENIED'
+            }), 403
+        
         course = Course.find_by_id(course_id)
         if not course:
             return jsonify({
@@ -496,39 +542,86 @@ def cancel_course(course_id):
                 'code': 'COURSE_NOT_FOUND'
             }), 404
         
-        # 只有教师可以取消课程
-        if user.role != 'teacher' or course.teacher_id != user_id:
+        # 检查教师是否有权限操作此课程
+        if course.teacher_id != user_id:
             return jsonify({
                 'success': False,
-                'message': '无权取消此课程',
+                'message': '无权为此课程报名学生',
                 'code': 'PERMISSION_DENIED'
             }), 403
         
-        data = request.get_json() or {}
-        reason = data.get('reason', '')
+        data = request.get_json()
+        student_ids = data.get('student_ids', [])
         
-        # 取消课程
-        if course.cancel(reason):
-            course_detail = Course.get_course_with_details(course.id)
-            return jsonify({
-                'success': True,
-                'message': '课程已取消',
-                'data': {
-                    'course': course_detail.to_dict() if course_detail else course.to_dict()
-                }
-            })
-        else:
+        if not student_ids:
             return jsonify({
                 'success': False,
-                'message': '无法取消课程，请检查课程状态',
-                'code': 'CANNOT_CANCEL_COURSE'
+                'message': '请选择要报名的学生',
+                'code': 'NO_STUDENTS_SELECTED'
             }), 400
+        
+        success_count = 0
+        failed_students = []
+        
+        for student_id in student_ids:
+            try:
+                # 检查学生是否存在
+                student = User.find_by_id(student_id)
+                if not student or student.role != 'student':
+                    failed_students.append({
+                        'student_id': student_id,
+                        'reason': '学生不存在或角色错误'
+                    })
+                    continue
+                
+                # 检查是否已报名
+                if CourseStudent.is_enrolled(course_id, student_id):
+                    failed_students.append({
+                        'student_id': student_id,
+                        'reason': '学生已报名此课程'
+                    })
+                    continue
+                
+                # 检查课程是否已满
+                enrolled_count = CourseStudent.get_enrollment_count(course_id)
+                if enrolled_count >= course.max_students:
+                    failed_students.append({
+                        'student_id': student_id,
+                        'reason': '课程已满'
+                    })
+                    continue
+                
+                # 创建报名记录
+                enrollment = CourseStudent(
+                    course_id=course_id,
+                    student_id=student_id,
+                    enrollment_date=datetime.now().isoformat(),
+                    status='enrolled'
+                )
+                enrollment.save()
+                success_count += 1
+                
+            except Exception as e:
+                failed_students.append({
+                    'student_id': student_id,
+                    'reason': f'报名失败: {str(e)}'
+                })
+        
+        return jsonify({
+            'success': True,
+            'message': f'批量报名完成，成功: {success_count}人，失败: {len(failed_students)}人',
+            'data': {
+                'success_count': success_count,
+                'failed_count': len(failed_students),
+                'failed_students': failed_students
+            }
+        })
         
     except Exception as e:
         return jsonify({
             'success': False,
-            'message': f'取消课程失败: {str(e)}',
-            'code': 'CANCEL_COURSE_ERROR'
+            'message': f'批量报名失败: {str(e)}',
+            'code': 'BATCH_ENROLL_ERROR'
         }), 500
 
 @courses_bp.route('/upcoming', methods=['GET'])
@@ -536,7 +629,7 @@ def cancel_course(course_id):
 def get_upcoming_courses():
     """获取即将到来的课程"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -550,16 +643,26 @@ def get_upcoming_courses():
         
         # 根据用户角色获取即将到来的课程
         if user.role == 'teacher':
-            courses = Course.get_upcoming_courses_by_teacher(user_id, limit)
+            courses = Course.get_upcoming_courses(user_id, limit)
         else:
-            courses = Course.get_upcoming_courses_by_student(user_id, limit)
+            # 学生获取已报名的即将到来的课程
+            enrollments = CourseStudent.get_by_student(user_id)
+            course_ids = [e.course_id for e in enrollments]
+            courses = []
+            for course_id in course_ids:
+                course = Course.find_by_id(course_id)
+                if course and course.start_time and datetime.fromisoformat(course.start_time.replace('Z', '+00:00')) > datetime.now():
+                    courses.append(course)
+            # 按开始时间排序并限制数量
+            courses.sort(key=lambda x: x.start_time)
+            courses = courses[:limit]
         
-        # 获取详细信息
+        # 转换为字典格式
         course_list = []
         for course in courses:
-            course_detail = Course.get_course_with_details(course.id)
-            if course_detail:
-                course_list.append(course_detail.to_dict())
+            course_dict = course.to_dict()
+            course_dict['enrolled_count'] = CourseStudent.get_enrollment_count(course.id)
+            course_list.append(course_dict)
         
         return jsonify({
             'success': True,

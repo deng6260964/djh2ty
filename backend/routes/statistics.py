@@ -1,6 +1,11 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import User, Course, Question, Homework, Exam
+from models.user import User
+from models.course import Course
+from models.question import Question
+from models.homework import Homework
+from models.exam import Exam
+from models.course_student import CourseStudent
 from datetime import datetime, timedelta
 
 statistics_bp = Blueprint('statistics', __name__, url_prefix='/api/statistics')
@@ -10,7 +15,7 @@ statistics_bp = Blueprint('statistics', __name__, url_prefix='/api/statistics')
 def get_teaching_statistics():
     """获取教师教学统计信息"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -31,8 +36,9 @@ def get_teaching_statistics():
         courses = Course.get_by_teacher(user_id)
         student_ids = set()
         for course in courses:
-            if course.student_id:
-                student_ids.add(course.student_id)
+            enrollments = CourseStudent.get_by_course(course.id)
+            for enrollment in enrollments:
+                student_ids.add(enrollment.student_id)
         total_students = len(student_ids)
         
         # 获取课程总数
@@ -53,7 +59,7 @@ def get_teaching_statistics():
                 pending_grading += 1
         
         # 获取考试统计
-        exams = Exam.query.filter_by(teacher_id=current_user.id).all()
+        exams = Exam.get_by_teacher(user_id)
         for exam in exams:
             if exam.status == 'submitted':
                 pending_grading += 1
@@ -160,7 +166,7 @@ def get_teaching_statistics():
 def get_dashboard_statistics():
     """获取仪表板统计信息"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -180,8 +186,9 @@ def get_dashboard_statistics():
             # 学生数量
             student_ids = set()
             for course in courses:
-                if course.student_id:
-                    student_ids.add(course.student_id)
+                enrollments = CourseStudent.get_by_course(course.id)
+                for enrollment in enrollments:
+                    student_ids.add(enrollment.student_id)
             
             return jsonify({
                 'success': True,
@@ -198,9 +205,15 @@ def get_dashboard_statistics():
         
         elif user.role == 'student':
             # 学生统计
-            courses = Course.get_by_student(user_id)
-            homeworks = Homework.get_by_student(user_id)
-            exams = Exam.get_by_student(user_id)
+            enrollments = CourseStudent.get_by_student(user_id)
+            course_ids = [e.course_id for e in enrollments]
+            courses = []
+            for course_id in course_ids:
+                course = Course.find_by_id(course_id)
+                if course:
+                    courses.append(course)
+            homeworks = Homework.get_by_student(user_id) if hasattr(Homework, 'get_by_student') else []
+            exams = Exam.get_by_student(user_id) if hasattr(Exam, 'get_by_student') else []
             
             # 计算平均分
             graded_homeworks = [h for h in homeworks if h.status == 'graded' and h.score is not None]

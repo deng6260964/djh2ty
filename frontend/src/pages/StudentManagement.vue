@@ -8,10 +8,30 @@ const router = useRouter()
 const students = ref<any[]>([])
 const loading = ref(false)
 const showDetailDialog = ref(false)
+const showCreateDialog = ref(false)
+const showEditDialog = ref(false)
 const currentStudent = ref<any>({})
 const studentProgress = ref<any>({})
 const searchValue = ref('')
 const activeTab = ref('list')
+const creating = ref(false)
+const editing = ref(false)
+const deleting = ref(false)
+
+// 新增学生表单数据
+const createForm = ref({
+  name: '',
+  phone: '',
+  password: '',
+  email: ''
+})
+
+// 编辑学生表单数据
+const editForm = ref({
+  name: '',
+  phone: '',
+  email: ''
+})
 
 onMounted(() => {
   loadStudents()
@@ -20,10 +40,30 @@ onMounted(() => {
 const loadStudents = async () => {
   try {
     loading.value = true
+    console.log('开始加载学生列表...')
+    
     const response = await apiService.getStudents()
-    students.value = response.data
-  } catch (error) {
-    showToast('加载学生列表失败')
+    console.log('学生列表API响应:', response)
+    
+    if (response.success) {
+      // 处理分页数据结构
+      if (response.data && response.data.students) {
+        students.value = response.data.students
+      } else if (Array.isArray(response.data)) {
+        students.value = response.data
+      } else {
+        students.value = []
+      }
+      console.log('学生列表加载成功，共', students.value.length, '个学生')
+    } else {
+      console.error('学生列表加载失败:', response.message)
+      showToast({ type: 'fail', message: response.message || '加载学生列表失败' })
+      students.value = []
+    }
+  } catch (error: any) {
+    console.error('加载学生列表失败:', error)
+    showToast({ type: 'fail', message: error.response?.data?.message || '加载学生列表失败' })
+    students.value = []
   } finally {
     loading.value = false
   }
@@ -32,12 +72,30 @@ const loadStudents = async () => {
 const openDetailDialog = async (student: any) => {
   currentStudent.value = student
   try {
+    console.log('开始加载学生详情，学生ID:', student.id)
+    
+    // 检查学生ID是否有效
+    if (!student.id) {
+      console.error('学生ID无效:', student)
+      showToast({ type: 'fail', message: '学生ID无效' })
+      return
+    }
+    
     // 获取学生学习进度
     const response = await apiService.getStudentProgress(student.id)
-    studentProgress.value = response.data
-    showDetailDialog.value = true
-  } catch (error) {
-    showToast('加载学生详情失败')
+    console.log('学生进度API响应:', response)
+    
+    if (response.success) {
+      studentProgress.value = response.data
+      showDetailDialog.value = true
+      console.log('学生详情加载成功')
+    } else {
+      console.error('学生进度API返回失败:', response.message)
+      showToast({ type: 'fail', message: response.message || '加载学生详情失败' })
+    }
+  } catch (error: any) {
+    console.error('加载学生详情失败:', error)
+    showToast({ type: 'fail', message: error.response?.data?.message || '加载学生详情失败' })
   }
 }
 
@@ -86,6 +144,155 @@ const getTopStudents = () => {
 const goBack = () => {
   router.back()
 }
+
+// 打开新增学生对话框
+const openCreateDialog = () => {
+  createForm.value = {
+    name: '',
+    phone: '',
+    password: '',
+    email: ''
+  }
+  showCreateDialog.value = true
+}
+
+// 创建学生
+const createStudent = async () => {
+  try {
+    creating.value = true
+    showToast({ type: 'loading', message: '创建中...', duration: 0 })
+    
+    console.log('开始创建学生，表单数据:', createForm.value)
+    
+    // 验证表单
+    if (!createForm.value.name || !createForm.value.phone || !createForm.value.password) {
+      console.error('表单验证失败：缺少必填字段')
+      showToast({ type: 'fail', message: '请填写必填字段' })
+      return
+    }
+    
+    // 验证手机号格式
+    const phoneRegex = /^1[3-9]\d{9}$/
+    if (!phoneRegex.test(createForm.value.phone)) {
+      console.error('手机号格式验证失败:', createForm.value.phone)
+      showToast({ type: 'fail', message: '请输入正确的手机号' })
+      return
+    }
+    
+    // 验证密码长度
+    if (createForm.value.password.length < 6) {
+      console.error('密码长度验证失败:', createForm.value.password.length)
+      showToast({ type: 'fail', message: '密码长度不能少于6位' })
+      return
+    }
+    
+    const response = await apiService.createStudent(createForm.value)
+    console.log('创建学生API响应:', response)
+    
+    if (response.success) {
+      console.log('学生创建成功')
+      showToast({ type: 'success', message: '学生创建成功' })
+      showCreateDialog.value = false
+      loadStudents() // 重新加载学生列表
+    } else {
+      console.error('创建学生API返回失败:', response.message)
+      showToast({ type: 'fail', message: response.message || '创建学生失败' })
+    }
+  } catch (error: any) {
+    console.error('创建学生失败:', error)
+    showToast({ type: 'fail', message: error.response?.data?.message || '创建学生失败' })
+  } finally {
+    creating.value = false
+  }
+}
+
+// 打开编辑学生对话框
+const openEditDialog = (student: any) => {
+  currentStudent.value = student
+  editForm.value = {
+    name: student.name,
+    phone: student.phone,
+    email: student.email || ''
+  }
+  showEditDialog.value = true
+}
+
+// 更新学生信息
+const updateStudent = async () => {
+  try {
+    editing.value = true
+    showToast({ type: 'loading', message: '更新中...', duration: 0 })
+    
+    console.log('开始更新学生信息，学生ID:', currentStudent.value.id, '表单数据:', editForm.value)
+    
+    // 检查学生ID是否有效
+    if (!currentStudent.value.id) {
+      console.error('学生ID无效:', currentStudent.value)
+      showToast({ type: 'fail', message: '学生ID无效' })
+      return
+    }
+    
+    // 验证表单
+    if (!editForm.value.name || !editForm.value.phone) {
+      console.error('表单验证失败：缺少必填字段')
+      showToast({ type: 'fail', message: '请填写必填字段' })
+      return
+    }
+    
+    // 验证手机号格式
+    const phoneRegex = /^1[3-9]\d{9}$/
+    if (!phoneRegex.test(editForm.value.phone)) {
+      console.error('手机号格式验证失败:', editForm.value.phone)
+      showToast({ type: 'fail', message: '请输入正确的手机号' })
+      return
+    }
+    
+    const response = await apiService.updateStudent(currentStudent.value.id, editForm.value)
+    console.log('更新学生API响应:', response)
+    
+    if (response.success) {
+      console.log('学生信息更新成功')
+      showToast({ type: 'success', message: '学生信息更新成功' })
+      showEditDialog.value = false
+      loadStudents() // 重新加载学生列表
+    } else {
+      console.error('更新学生API返回失败:', response.message)
+      showToast({ type: 'fail', message: response.message || '更新学生信息失败' })
+    }
+  } catch (error: any) {
+    console.error('更新学生信息失败:', error)
+    showToast({ type: 'fail', message: error.response?.data?.message || '更新学生信息失败' })
+  } finally {
+    editing.value = false
+  }
+}
+
+// 删除学生
+const deleteStudent = async (student: any) => {
+  try {
+    // 使用原生确认对话框
+    const confirmed = confirm(`确定要删除学生 "${student.name}" 吗？\n\n此操作不可恢复！`)
+    
+    if (!confirmed) return
+    
+    deleting.value = true
+    showToast({ type: 'loading', message: '删除中...', duration: 0 })
+    
+    const response = await apiService.deleteStudent(student.id)
+    
+    if (response.success) {
+      showToast({ type: 'success', message: '学生删除成功' })
+      loadStudents() // 重新加载学生列表
+    } else {
+      showToast({ type: 'fail', message: response.message || '删除学生失败' })
+    }
+  } catch (error: any) {
+    console.error('删除学生失败:', error)
+    showToast({ type: 'fail', message: error.response?.data?.message || '删除学生失败' })
+  } finally {
+    deleting.value = false
+  }
+}
 </script>
 
 <template>
@@ -97,7 +304,7 @@ const goBack = () => {
     <van-tabs v-model:active="activeTab">
       <van-tab title="学生列表" name="list">
         <div class="content">
-          <!-- 搜索框 -->
+          <!-- 搜索框和操作按钮 -->
           <div class="search-section">
             <van-search
               v-model="searchValue"
@@ -108,6 +315,13 @@ const goBack = () => {
                 <div @click="searchValue = ''">清空</div>
               </template>
             </van-search>
+            
+            <!-- 新增学生按钮 -->
+            <div class="action-buttons">
+              <van-button type="primary" size="small" @click="openCreateDialog">
+                <van-icon name="plus" /> 新增学生
+              </van-button>
+            </div>
           </div>
 
           <!-- 学生列表 -->
@@ -156,6 +370,12 @@ const goBack = () => {
                   <div class="student-actions">
                     <van-button size="small" type="primary" @click.stop="openDetailDialog(student)">
                       查看详情
+                    </van-button>
+                    <van-button size="small" type="default" @click.stop="openEditDialog(student)">
+                      编辑
+                    </van-button>
+                    <van-button size="small" type="danger" @click.stop="deleteStudent(student)" :loading="deleting">
+                      删除
                     </van-button>
                   </div>
                 </template>
@@ -297,6 +517,97 @@ const goBack = () => {
         </van-tabs>
       </div>
     </van-dialog>
+
+    <!-- 新增学生对话框 -->
+    <van-dialog
+      v-model:show="showCreateDialog"
+      title="新增学生"
+      show-cancel-button
+      :before-close="() => !creating"
+      @confirm="createStudent"
+      :confirm-button-loading="creating"
+      confirm-button-text="创建"
+    >
+      <div class="form-content">
+        <van-form>
+          <van-field
+            v-model="createForm.name"
+            label="姓名"
+            placeholder="请输入学生姓名"
+            required
+            :rules="[{ required: true, message: '请输入学生姓名' }]"
+          />
+          <van-field
+            v-model="createForm.phone"
+            label="手机号"
+            placeholder="请输入手机号"
+            type="tel"
+            required
+            :rules="[
+              { required: true, message: '请输入手机号' },
+              { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号' }
+            ]"
+          />
+          <van-field
+            v-model="createForm.password"
+            label="密码"
+            placeholder="请输入密码（至少6位）"
+            type="password"
+            required
+            :rules="[
+              { required: true, message: '请输入密码' },
+              { validator: (value: string) => value.length >= 6, message: '密码长度不能少于6位' }
+            ]"
+          />
+          <van-field
+            v-model="createForm.email"
+            label="邮箱"
+            placeholder="请输入邮箱（可选）"
+            type="email"
+          />
+        </van-form>
+      </div>
+    </van-dialog>
+
+    <!-- 编辑学生对话框 -->
+    <van-dialog
+      v-model:show="showEditDialog"
+      title="编辑学生信息"
+      show-cancel-button
+      :before-close="() => !editing"
+      @confirm="updateStudent"
+      :confirm-button-loading="editing"
+      confirm-button-text="保存"
+    >
+      <div class="form-content">
+        <van-form>
+          <van-field
+            v-model="editForm.name"
+            label="姓名"
+            placeholder="请输入学生姓名"
+            required
+            :rules="[{ required: true, message: '请输入学生姓名' }]"
+          />
+          <van-field
+            v-model="editForm.phone"
+            label="手机号"
+            placeholder="请输入手机号"
+            type="tel"
+            required
+            :rules="[
+              { required: true, message: '请输入手机号' },
+              { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号' }
+            ]"
+          />
+          <van-field
+            v-model="editForm.email"
+            label="邮箱"
+            placeholder="请输入邮箱（可选）"
+            type="email"
+          />
+        </van-form>
+      </div>
+    </van-dialog>
   </div>
 </template>
 
@@ -312,6 +623,24 @@ const goBack = () => {
 
 .search-section {
   margin-bottom: 16px;
+}
+
+.action-buttons {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.action-buttons .van-button {
+  margin-left: 8px;
+}
+
+.form-content {
+  padding: 16px 0;
+}
+
+.form-content .van-field {
+  margin-bottom: 12px;
 }
 
 .student-card {

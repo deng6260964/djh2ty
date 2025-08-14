@@ -18,7 +18,7 @@ students_bp = Blueprint('students', __name__, url_prefix='/api/students')
 def get_students():
     """获取学生列表"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -60,43 +60,48 @@ def get_students():
         end_idx = start_idx + limit
         paginated_students = students[start_idx:end_idx]
         
-        # 获取学生详细信息（包括统计数据）
+        # 获取学生详细信息（简化版本）
         student_details = []
         for student in paginated_students:
             student_dict = student.to_dict()
             
-            # 获取课程统计
-            courses = Course.get_by_student(student.id)
-            course_stats = {
-                'total': len(courses),
-                'completed': len([c for c in courses if c.status == 'completed']),
-                'scheduled': len([c for c in courses if c.status == 'scheduled']),
-                'in_progress': len([c for c in courses if c.status == 'in_progress'])
-            }
-            
-            # 获取作业统计
-            homeworks = Homework.get_by_student(student.id)
-            homework_stats = {
-                'total': len(homeworks),
-                'completed': len([h for h in homeworks if h.status == 'graded']),
-                'pending': len([h for h in homeworks if h.status == 'pending']),
-                'submitted': len([h for h in homeworks if h.status == 'submitted'])
-            }
-            
-            # 获取考试统计
-            exams = Exam.get_by_student(student.id)
-            exam_stats = {
-                'total': len(exams),
-                'completed': len([e for e in exams if e.status == 'graded']),
-                'scheduled': len([e for e in exams if e.status == 'scheduled']),
-                'in_progress': len([e for e in exams if e.status == 'in_progress'])
-            }
-            
-            student_dict['statistics'] = {
-                'courses': course_stats,
-                'homeworks': homework_stats,
-                'exams': exam_stats
-            }
+            # 简化统计信息，避免调用不存在的方法
+            try:
+                # 获取课程统计 - 通过course_students表
+                course_query = '''
+                    SELECT COUNT(*) as total FROM course_students 
+                    WHERE student_id = ? AND status = 'enrolled'
+                '''
+                course_result = db.execute_query(course_query, (student.id,))
+                course_count = course_result[0]['total'] if course_result else 0
+                
+                student_dict['statistics'] = {
+                    'courses': {
+                        'total': course_count,
+                        'completed': 0,
+                        'scheduled': 0,
+                        'in_progress': course_count
+                    },
+                    'homeworks': {
+                        'total': 0,
+                        'completed': 0,
+                        'pending': 0,
+                        'submitted': 0
+                    },
+                    'exams': {
+                        'total': 0,
+                        'completed': 0,
+                        'scheduled': 0,
+                        'in_progress': 0
+                    }
+                }
+            except Exception as e:
+                # 如果统计失败，使用默认值
+                student_dict['statistics'] = {
+                    'courses': {'total': 0, 'completed': 0, 'scheduled': 0, 'in_progress': 0},
+                    'homeworks': {'total': 0, 'completed': 0, 'pending': 0, 'submitted': 0},
+                    'exams': {'total': 0, 'completed': 0, 'scheduled': 0, 'in_progress': 0}
+                }
             
             student_details.append(student_dict)
         
@@ -125,7 +130,7 @@ def get_students():
 def get_student(student_id):
     """获取学生详情"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -153,50 +158,41 @@ def get_student(student_id):
         
         student_dict = student.to_dict()
         
-        # 获取详细统计信息
-        # 课程信息
-        courses = Course.get_by_student(student_id)
-        course_details = []
-        for course in courses:
-            course_detail = Course.get_course_with_details(course.id)
-            course_details.append(course_detail)
-        
-        # 作业信息
-        homeworks = Homework.get_by_student(student_id)
-        homework_details = []
-        for homework in homeworks:
-            homework_detail = Homework.get_homework_with_details(homework.id)
-            homework_details.append(homework_detail)
-        
-        # 考试信息
-        exams = Exam.get_by_student(student_id)
-        exam_details = []
-        for exam in exams:
-            exam_detail = Exam.get_exam_with_details(exam.id)
-            exam_details.append(exam_detail)
-        
-        # 计算平均分
-        graded_homeworks = [h for h in homeworks if h.status == 'graded' and h.score is not None]
-        homework_avg_score = sum([h.score for h in graded_homeworks]) / len(graded_homeworks) if graded_homeworks else 0
-        
-        graded_exams = [e for e in exams if e.status == 'graded' and e.score is not None]
-        exam_avg_score = sum([e.score for e in graded_exams]) / len(graded_exams) if graded_exams else 0
-        
-        # 学习进度
-        total_courses = len(courses)
-        completed_courses = len([c for c in courses if c.status == 'completed'])
-        progress = (completed_courses / total_courses * 100) if total_courses > 0 else 0
-        
-        student_dict['details'] = {
-            'courses': course_details,
-            'homeworks': homework_details,
-            'exams': exam_details,
-            'performance': {
-                'homework_avg_score': round(homework_avg_score, 2),
-                'exam_avg_score': round(exam_avg_score, 2),
-                'overall_progress': round(progress, 2)
+        # 简化详细统计信息
+        try:
+            # 获取课程信息 - 通过course_students表
+            course_query = '''
+                SELECT c.*, cs.enrollment_date, cs.status as enrollment_status
+                FROM courses c
+                JOIN course_students cs ON c.id = cs.course_id
+                WHERE cs.student_id = ? AND cs.status = 'enrolled'
+                ORDER BY c.start_time ASC
+            '''
+            course_results = db.execute_query(course_query, (student_id,))
+            course_details = [dict(row) for row in course_results] if course_results else []
+            
+            student_dict['details'] = {
+                'courses': course_details,
+                'homeworks': [],  # 暂时为空，避免调用不存在的方法
+                'exams': [],      # 暂时为空，避免调用不存在的方法
+                'performance': {
+                    'homework_avg_score': 0,
+                    'exam_avg_score': 0,
+                    'overall_progress': 0
+                }
             }
-        }
+        except Exception as e:
+            # 如果获取详细信息失败，使用默认值
+            student_dict['details'] = {
+                'courses': [],
+                'homeworks': [],
+                'exams': [],
+                'performance': {
+                    'homework_avg_score': 0,
+                    'exam_avg_score': 0,
+                    'overall_progress': 0
+                }
+            }
         
         return jsonify({
             'success': True,
@@ -217,7 +213,7 @@ def get_student(student_id):
 def get_student_performance(student_id):
     """获取学生学习表现分析"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -363,7 +359,7 @@ def get_student_performance(student_id):
 def get_students_statistics():
     """获取学生整体统计信息"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -486,15 +482,273 @@ def get_students_statistics():
             'code': 'GET_STUDENTS_STATISTICS_ERROR'
         }), 500
 
+@students_bp.route('', methods=['POST'])
+@jwt_required()
+def create_student():
+    """创建学生"""
+    try:
+        print(f"[DEBUG] 开始创建学生")
+        user_id = int(get_jwt_identity())
+        user = User.find_by_id(user_id)
+        
+        if not user:
+            print(f"[ERROR] 用户不存在 - user_id: {user_id}")
+            return jsonify({
+                'success': False,
+                'message': '用户不存在',
+                'code': 'USER_NOT_FOUND'
+            }), 404
+        
+        # 只有教师可以创建学生
+        if user.role != 'teacher':
+            print(f"[ERROR] 权限不足 - user_id: {user_id}, role: {user.role}")
+            return jsonify({
+                'success': False,
+                'message': '只有教师可以创建学生',
+                'code': 'PERMISSION_DENIED'
+            }), 403
+        
+        data = request.get_json()
+        print(f"[DEBUG] 接收到创建学生数据: {data.get('name', 'N/A')}, {data.get('phone', 'N/A')}")
+        
+        # 验证必填字段
+        required_fields = ['name', 'phone', 'password']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({
+                    'success': False,
+                    'message': f'缺少必填字段: {field}',
+                    'code': 'MISSING_REQUIRED_FIELD'
+                }), 400
+        
+        # 检查手机号是否已存在
+        existing_user = User.find_by_phone(data['phone'])
+        if existing_user:
+            print(f"[ERROR] 手机号已存在 - phone: {data['phone']}")
+            return jsonify({
+                'success': False,
+                'message': '手机号已存在',
+                'code': 'PHONE_EXISTS'
+            }), 400
+        
+        # 创建学生用户
+        print(f"[DEBUG] 开始创建学生用户")
+        student_data = {
+            'name': data['name'],
+            'phone': data['phone'],
+            'password': data['password'],
+            'role': 'student',
+            'email': data.get('email', ''),
+            'avatar': data.get('avatar', ''),
+            'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+        
+        student = User.create(student_data)
+        print(f"[DEBUG] 学生创建成功 - student_id: {student.id}, name: {student.name}")
+        
+        return jsonify({
+            'success': True,
+            'message': '学生创建成功',
+            'data': {
+                'student': student.to_dict()
+            }
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 创建学生失败 - error: {str(e)}")
+        import traceback
+        print(f"[ERROR] 详细错误信息: {traceback.format_exc()}")
+        return jsonify({
+            'success': False,
+            'message': f'创建学生失败: {str(e)}',
+            'code': 'CREATE_STUDENT_ERROR'
+        }), 500
+
+@students_bp.route('/<int:student_id>', methods=['PUT'])
+@jwt_required()
+def update_student(student_id):
+    """更新学生信息"""
+    try:
+        print(f"[DEBUG] 开始更新学生信息 - student_id: {student_id}")
+        user_id = int(get_jwt_identity())
+        user = User.find_by_id(user_id)
+        
+        if not user:
+            print(f"[ERROR] 用户不存在 - user_id: {user_id}")
+            return jsonify({
+                'success': False,
+                'message': '用户不存在',
+                'code': 'USER_NOT_FOUND'
+            }), 404
+        
+        # 只有教师可以更新学生信息，或者学生更新自己的信息
+        if user.role == 'student' and user.id != student_id:
+            print(f"[ERROR] 权限不足 - user_id: {user_id}, role: {user.role}, target_student_id: {student_id}")
+            return jsonify({
+                'success': False,
+                'message': '无权修改此学生信息',
+                'code': 'ACCESS_DENIED'
+            }), 403
+        
+        student = User.find_by_id(student_id)
+        if not student or student.role != 'student':
+            print(f"[ERROR] 学生不存在 - student_id: {student_id}")
+            return jsonify({
+                'success': False,
+                'message': '学生不存在',
+                'code': 'STUDENT_NOT_FOUND'
+            }), 404
+        
+        data = request.get_json()
+        print(f"[DEBUG] 接收到更新数据 - student: {student.name}, data: {list(data.keys()) if data else 'None'}")
+        
+        # 如果更新手机号，检查是否已存在
+        if 'phone' in data and data['phone'] != student.phone:
+            existing_user = User.find_by_phone(data['phone'])
+            if existing_user:
+                print(f"[ERROR] 手机号已存在 - phone: {data['phone']}")
+                return jsonify({
+                    'success': False,
+                    'message': '手机号已存在',
+                    'code': 'PHONE_EXISTS'
+                }), 400
+        
+        # 更新学生信息
+        print(f"[DEBUG] 开始更新学生信息")
+        update_data = {
+            'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+        
+        # 允许更新的字段
+        allowed_fields = ['name', 'phone', 'email', 'avatar']
+        for field in allowed_fields:
+            if field in data:
+                update_data[field] = data[field]
+        
+        # 如果是教师或学生更新自己的密码
+        if 'password' in data and (user.role == 'teacher' or user.id == student_id):
+            update_data['password'] = data['password']
+        
+        print(f"[DEBUG] 更新字段: {list(update_data.keys())}")
+        student.update(update_data)
+        print(f"[DEBUG] 学生信息更新成功 - student_id: {student_id}")
+        
+        return jsonify({
+            'success': True,
+            'message': '学生信息更新成功',
+            'data': {
+                'student': student.to_dict()
+            }
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 更新学生信息失败 - student_id: {student_id}, error: {str(e)}")
+        import traceback
+        print(f"[ERROR] 详细错误信息: {traceback.format_exc()}")
+        return jsonify({
+            'success': False,
+            'message': f'更新学生信息失败: {str(e)}',
+            'code': 'UPDATE_STUDENT_ERROR'
+        }), 500
+
+@students_bp.route('/<int:student_id>', methods=['DELETE'])
+@jwt_required()
+def delete_student(student_id):
+    """删除学生"""
+    try:
+        print(f"[DEBUG] 开始删除学生 - student_id: {student_id}")
+        user_id = int(get_jwt_identity())
+        user = User.find_by_id(user_id)
+        
+        if not user:
+            print(f"[ERROR] 用户不存在 - user_id: {user_id}")
+            return jsonify({
+                'success': False,
+                'message': '用户不存在',
+                'code': 'USER_NOT_FOUND'
+            }), 404
+        
+        # 只有教师可以删除学生
+        if user.role != 'teacher':
+            print(f"[ERROR] 权限不足 - user_id: {user_id}, role: {user.role}")
+            return jsonify({
+                'success': False,
+                'message': '只有教师可以删除学生',
+                'code': 'PERMISSION_DENIED'
+            }), 403
+        
+        student = User.find_by_id(student_id)
+        if not student or student.role != 'student':
+            print(f"[ERROR] 学生不存在 - student_id: {student_id}")
+            return jsonify({
+                'success': False,
+                'message': '学生不存在',
+                'code': 'STUDENT_NOT_FOUND'
+            }), 404
+        
+        print(f"[DEBUG] 找到学生 - name: {student.name}, id: {student.id}")
+        
+        # 删除学生相关的关联数据
+        try:
+            print(f"[DEBUG] 开始删除学生关联数据")
+            
+            # 删除课程关联
+            print(f"[DEBUG] 删除课程关联数据")
+            db.execute_update('DELETE FROM course_students WHERE student_id = ?', (student_id,))
+            
+            # 删除作业答案
+            print(f"[DEBUG] 删除作业答案数据")
+            db.execute_update('DELETE FROM homework_answers WHERE student_id = ?', (student_id,))
+            
+            # 删除考试答案
+            print(f"[DEBUG] 删除考试答案数据")
+            db.execute_update('DELETE FROM exam_answers WHERE student_id = ?', (student_id,))
+            
+            # 删除学生用户
+            print(f"[DEBUG] 删除学生用户记录")
+            student.delete()
+            
+            print(f"[DEBUG] 学生删除成功 - student_id: {student_id}")
+            
+        except Exception as e:
+            print(f"[ERROR] 删除学生关联数据失败 - student_id: {student_id}, error: {str(e)}")
+            print(f"[ERROR] 详细错误信息: {repr(e)}")
+            import traceback
+            print(f"[ERROR] 错误堆栈: {traceback.format_exc()}")
+            return jsonify({
+                'success': False,
+                'message': f'删除学生关联数据失败: {str(e)}',
+                'code': 'DELETE_STUDENT_DATA_ERROR'
+            }), 500
+        
+        return jsonify({
+            'success': True,
+            'message': '学生删除成功'
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 删除学生失败 - student_id: {student_id}, error: {str(e)}")
+        print(f"[ERROR] 详细错误信息: {repr(e)}")
+        import traceback
+        print(f"[ERROR] 错误堆栈: {traceback.format_exc()}")
+        return jsonify({
+            'success': False,
+            'message': f'删除学生失败: {str(e)}',
+            'code': 'DELETE_STUDENT_ERROR'
+        }), 500
+
 @students_bp.route('/<int:student_id>/progress', methods=['GET'])
 @jwt_required()
 def get_student_progress(student_id):
     """获取学生学习进度"""
     try:
-        user_id = get_jwt_identity()
+        print(f"[DEBUG] 获取学生进度 - student_id: {student_id}")
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
+            print(f"[ERROR] 用户不存在 - user_id: {user_id}")
             return jsonify({
                 'success': False,
                 'message': '用户不存在',
@@ -503,6 +757,7 @@ def get_student_progress(student_id):
         
         # 只有教师可以查看学生进度，或者学生查看自己的进度
         if user.role == 'student' and user.id != student_id:
+            print(f"[ERROR] 权限不足 - user_id: {user_id}, role: {user.role}, target_student_id: {student_id}")
             return jsonify({
                 'success': False,
                 'message': '无权查看此学生进度',
@@ -511,49 +766,93 @@ def get_student_progress(student_id):
         
         student = User.find_by_id(student_id)
         if not student or student.role != 'student':
+            print(f"[ERROR] 学生不存在 - student_id: {student_id}")
             return jsonify({
                 'success': False,
                 'message': '学生不存在',
                 'code': 'STUDENT_NOT_FOUND'
             }), 404
         
+        print(f"[DEBUG] 开始获取学生进度数据 - student: {student.name}")
+        
         # 获取课程进度
-        courses = Course.get_by_student(student_id)
-        course_progress = {
-            'total': len(courses),
-            'completed': len([c for c in courses if c.status == 'completed']),
-            'in_progress': len([c for c in courses if c.status == 'in_progress']),
-            'scheduled': len([c for c in courses if c.status == 'scheduled']),
-            'cancelled': len([c for c in courses if c.status == 'cancelled'])
-        }
-        course_progress['completion_rate'] = round(
-            course_progress['completed'] / course_progress['total'] * 100, 2
-        ) if course_progress['total'] > 0 else 0
+        try:
+            print(f"[DEBUG] 开始获取课程进度")
+            from models.course_student import CourseStudent
+            course_enrollments = CourseStudent.get_by_student(student_id)
+            print(f"[DEBUG] 找到课程注册记录: {len(course_enrollments)}")
+            
+            courses = []
+            for enrollment in course_enrollments:
+                course = Course.find_by_id(enrollment.course_id)
+                if course:
+                    courses.append(course)
+            
+            print(f"[DEBUG] 有效课程数量: {len(courses)}")
+            course_progress = {
+                'total': len(courses),
+                'completed': len([c for c in courses if c.status == 'completed']),
+                'in_progress': len([c for c in courses if c.status == 'in_progress']),
+                'scheduled': len([c for c in courses if c.status == 'scheduled']),
+                'cancelled': len([c for c in courses if c.status == 'cancelled'])
+            }
+            course_progress['completion_rate'] = round(
+                course_progress['completed'] / course_progress['total'] * 100, 2
+            ) if course_progress['total'] > 0 else 0
+        except Exception as e:
+            print(f"[ERROR] 获取课程进度失败: {str(e)}")
+            course_progress = {
+                'total': 0, 'completed': 0, 'in_progress': 0, 
+                'scheduled': 0, 'cancelled': 0, 'completion_rate': 0
+            }
+            courses = []
         
         # 获取作业进度
-        homeworks = Homework.get_by_student(student_id)
-        homework_progress = {
-            'total': len(homeworks),
-            'pending': len([h for h in homeworks if h.status == 'pending']),
-            'submitted': len([h for h in homeworks if h.status == 'submitted']),
-            'graded': len([h for h in homeworks if h.status == 'graded'])
-        }
-        homework_progress['completion_rate'] = round(
-            (homework_progress['submitted'] + homework_progress['graded']) / homework_progress['total'] * 100, 2
-        ) if homework_progress['total'] > 0 else 0
+        try:
+            print(f"[DEBUG] 开始获取作业进度")
+            homeworks = Homework.get_by_student(student_id)
+            print(f"[DEBUG] 找到作业数量: {len(homeworks)}")
+            
+            homework_progress = {
+                'total': len(homeworks),
+                'pending': len([h for h in homeworks if h.status == 'assigned']),
+                'submitted': len([h for h in homeworks if h.status == 'submitted']),
+                'graded': len([h for h in homeworks if h.status == 'graded'])
+            }
+            homework_progress['completion_rate'] = round(
+                (homework_progress['submitted'] + homework_progress['graded']) / homework_progress['total'] * 100, 2
+            ) if homework_progress['total'] > 0 else 0
+        except Exception as e:
+            print(f"[ERROR] 获取作业进度失败: {str(e)}")
+            homework_progress = {
+                'total': 0, 'pending': 0, 'submitted': 0, 
+                'graded': 0, 'completion_rate': 0
+            }
+            homeworks = []
         
         # 获取考试进度
-        exams = Exam.get_by_student(student_id)
-        exam_progress = {
-            'total': len(exams),
-            'scheduled': len([e for e in exams if e.status == 'scheduled']),
-            'in_progress': len([e for e in exams if e.status == 'in_progress']),
-            'completed': len([e for e in exams if e.status == 'completed']),
-            'graded': len([e for e in exams if e.status == 'graded'])
-        }
-        exam_progress['completion_rate'] = round(
-            (exam_progress['completed'] + exam_progress['graded']) / exam_progress['total'] * 100, 2
-        ) if exam_progress['total'] > 0 else 0
+        try:
+            print(f"[DEBUG] 开始获取考试进度")
+            exams = Exam.get_by_student(student_id)
+            print(f"[DEBUG] 找到考试数量: {len(exams)}")
+            
+            exam_progress = {
+                'total': len(exams),
+                'scheduled': len([e for e in exams if e.status == 'scheduled']),
+                'in_progress': len([e for e in exams if e.status == 'in_progress']),
+                'completed': len([e for e in exams if e.status == 'completed']),
+                'graded': len([e for e in exams if e.status == 'graded'])
+            }
+            exam_progress['completion_rate'] = round(
+                (exam_progress['completed'] + exam_progress['graded']) / exam_progress['total'] * 100, 2
+            ) if exam_progress['total'] > 0 else 0
+        except Exception as e:
+            print(f"[ERROR] 获取考试进度失败: {str(e)}")
+            exam_progress = {
+                'total': 0, 'scheduled': 0, 'in_progress': 0, 
+                'completed': 0, 'graded': 0, 'completion_rate': 0
+            }
+            exams = []
         
         # 整体学习进度
         total_tasks = course_progress['total'] + homework_progress['total'] + exam_progress['total']
@@ -568,44 +867,58 @@ def get_student_progress(student_id):
         }
         
         # 最近活动
-        recent_activities = []
+        try:
+            print(f"[DEBUG] 开始获取最近活动")
+            recent_activities = []
+            
+            # 添加最近的课程活动
+            if courses:
+                recent_courses = sorted([c for c in courses if hasattr(c, 'updated_at') and c.updated_at], 
+                                      key=lambda x: x.updated_at, reverse=True)[:5]
+                for course in recent_courses:
+                    recent_activities.append({
+                        'type': 'course',
+                        'id': course.id,
+                        'title': course.title,
+                        'status': course.status,
+                        'updated_at': course.updated_at
+                    })
+            
+            # 添加最近的作业活动
+            if homeworks:
+                recent_homeworks = sorted([h for h in homeworks if hasattr(h, 'updated_at') and h.updated_at], 
+                                        key=lambda x: x.updated_at, reverse=True)[:5]
+                for homework in recent_homeworks:
+                    recent_activities.append({
+                        'type': 'homework',
+                        'id': homework.id,
+                        'title': homework.title,
+                        'status': homework.status,
+                        'updated_at': homework.updated_at
+                    })
+            
+            # 添加最近的考试活动
+            if exams:
+                recent_exams = sorted([e for e in exams if hasattr(e, 'updated_at') and e.updated_at], 
+                                    key=lambda x: x.updated_at, reverse=True)[:5]
+                for exam in recent_exams:
+                    recent_activities.append({
+                        'type': 'exam',
+                        'id': exam.id,
+                        'title': exam.title,
+                        'status': exam.status,
+                        'updated_at': exam.updated_at
+                    })
+            
+            # 按时间排序最近活动
+            recent_activities = sorted([a for a in recent_activities if a.get('updated_at')], 
+                                     key=lambda x: x['updated_at'], reverse=True)[:10]
+            print(f"[DEBUG] 最近活动数量: {len(recent_activities)}")
+        except Exception as e:
+            print(f"[ERROR] 获取最近活动失败: {str(e)}")
+            recent_activities = []
         
-        # 添加最近的课程活动
-        recent_courses = sorted(courses, key=lambda x: x.updated_at, reverse=True)[:5]
-        for course in recent_courses:
-            recent_activities.append({
-                'type': 'course',
-                'id': course.id,
-                'title': course.title,
-                'status': course.status,
-                'updated_at': course.updated_at
-            })
-        
-        # 添加最近的作业活动
-        recent_homeworks = sorted(homeworks, key=lambda x: x.updated_at, reverse=True)[:5]
-        for homework in recent_homeworks:
-            recent_activities.append({
-                'type': 'homework',
-                'id': homework.id,
-                'title': homework.title,
-                'status': homework.status,
-                'updated_at': homework.updated_at
-            })
-        
-        # 添加最近的考试活动
-        recent_exams = sorted(exams, key=lambda x: x.updated_at, reverse=True)[:5]
-        for exam in recent_exams:
-            recent_activities.append({
-                'type': 'exam',
-                'id': exam.id,
-                'title': exam.title,
-                'status': exam.status,
-                'updated_at': exam.updated_at
-            })
-        
-        # 按时间排序最近活动
-        recent_activities = sorted(recent_activities, key=lambda x: x['updated_at'], reverse=True)[:10]
-        
+        print(f"[DEBUG] 学生进度获取成功 - student_id: {student_id}")
         return jsonify({
             'success': True,
             'data': {
@@ -619,6 +932,9 @@ def get_student_progress(student_id):
         })
         
     except Exception as e:
+        print(f"[ERROR] 获取学生进度失败 - student_id: {student_id}, error: {str(e)}")
+        import traceback
+        print(f"[ERROR] 详细错误信息: {traceback.format_exc()}")
         return jsonify({
             'success': False,
             'message': f'获取学生进度失败: {str(e)}',

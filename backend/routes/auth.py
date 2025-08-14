@@ -91,7 +91,7 @@ def register():
         
         # 生成访问令牌
         access_token = create_access_token(
-            identity=user.id,
+            identity=str(user.id),
             expires_delta=timedelta(days=7)
         )
         
@@ -166,7 +166,7 @@ def login():
         
         # 生成访问令牌
         access_token = create_access_token(
-            identity=user.id,
+            identity=str(user.id),
             expires_delta=timedelta(days=7)
         )
         
@@ -191,7 +191,7 @@ def login():
 def get_profile():
     """获取用户信息"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -220,7 +220,7 @@ def get_profile():
 def update_profile():
     """更新用户信息"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -265,7 +265,7 @@ def update_profile():
 def change_password():
     """修改密码"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:

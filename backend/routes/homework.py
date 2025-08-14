@@ -27,7 +27,7 @@ def validate_homework_status(status):
 def get_homework_list():
     """获取作业列表"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -116,7 +116,7 @@ def get_homework_list():
 def get_homework(homework_id):
     """获取作业详情"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -182,7 +182,7 @@ def get_homework(homework_id):
 def create_homework():
     """创建作业"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -294,7 +294,7 @@ def create_homework():
 def update_homework(homework_id):
     """更新作业"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -416,7 +416,7 @@ def update_homework(homework_id):
 def submit_homework(homework_id):
     """提交作业"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -517,7 +517,7 @@ def submit_homework(homework_id):
 def grade_homework(homework_id):
     """批改作业"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -607,7 +607,7 @@ def grade_homework(homework_id):
 def delete_homework(homework_id):
     """删除作业"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -669,7 +669,7 @@ def delete_homework(homework_id):
 def get_overdue_homework():
     """获取过期作业"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -715,7 +715,7 @@ def get_overdue_homework():
 def get_homework_submissions(homework_id):
     """获取作业提交列表"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -782,7 +782,7 @@ def get_homework_submissions(homework_id):
 def get_homework_statistics():
     """获取作业统计信息"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:

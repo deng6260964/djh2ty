@@ -31,9 +31,9 @@ const recentExams = ref([])
 const quickFeatures = [
   {
     icon: 'apps-o',
-    title: '我的课程',
+    title: '课程中心',
     color: '#1989fa',
-    path: '/course-management'
+    path: '/student/courses'
   },
   {
     icon: 'todo-list-o',

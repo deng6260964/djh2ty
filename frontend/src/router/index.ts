@@ -5,12 +5,14 @@ import RegisterPage from '@/pages/RegisterPage.vue'
 import TeacherDashboard from '@/pages/TeacherDashboard.vue'
 import StudentDashboard from '@/pages/StudentDashboard.vue'
 import CourseManagement from '@/pages/CourseManagement.vue'
+import Schedule from '@/pages/Schedule.vue'
 import QuestionManagement from '@/pages/QuestionManagement.vue'
 import HomeworkManagement from '@/pages/HomeworkManagement.vue'
 import StudentHomework from '@/pages/StudentHomework.vue'
 import ExamManagement from '@/pages/ExamManagement.vue'
 import StudentExam from '@/pages/StudentExam.vue'
 import StudentManagement from '@/pages/StudentManagement.vue'
+import StudentCourses from '@/pages/StudentCourses.vue'
 import DataStatistics from '@/pages/DataStatistics.vue'
 import apiService from '@/services/api'
 
@@ -50,6 +52,18 @@ const routes = [
     meta: { requiresAuth: true, role: 'teacher' }
   },
   {
+    path: '/teacher/courses',
+    name: 'TeacherCourses',
+    component: CourseManagement,
+    meta: { requiresAuth: true, role: 'teacher' }
+  },
+  {
+    path: '/schedule',
+    name: 'Schedule',
+    component: Schedule,
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/question-management',
     name: 'QuestionManagement',
     component: QuestionManagement,
@@ -77,6 +91,12 @@ const routes = [
     path: '/student-exam',
     name: 'StudentExam',
     component: StudentExam,
+    meta: { requiresAuth: true, role: 'student' }
+  },
+  {
+    path: '/student/courses',
+    name: 'StudentCourses',
+    component: StudentCourses,
     meta: { requiresAuth: true, role: 'student' }
   },
   {

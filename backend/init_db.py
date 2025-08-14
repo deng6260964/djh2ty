@@ -110,23 +110,39 @@ def create_initial_data():
     courses = [
         {
             'teacher_id': teacher_id,
-            'student_id': student_ids[0],
-            'subject': '英语语法基础',
-            'course_time': (now + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S'),
-            'duration': 120,
+            'title': '英语语法基础课程',
+            'subject': '英语',
+            'level': '初级',
+            'start_time': (now + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S'),
+            'end_time': (now + timedelta(days=1, hours=2)).strftime('%Y-%m-%d %H:%M:%S'),
             'location': '在线教室A',
-            'status': 'scheduled',
-            'notes': '学习英语基础语法知识，包括时态、语态、句型结构等'
+            'max_students': 10,
+            'description': '学习英语基础语法知识，包括时态、语态、句型结构等',
+            'status': 'active'
         },
         {
             'teacher_id': teacher_id,
-            'student_id': student_ids[1],
-            'subject': '英语口语练习',
-            'course_time': (now + timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S'),
-            'duration': 90,
+            'title': '英语口语练习课程',
+            'subject': '英语',
+            'level': '中级',
+            'start_time': (now + timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S'),
+            'end_time': (now + timedelta(days=2, hours=1, minutes=30)).strftime('%Y-%m-%d %H:%M:%S'),
             'location': '在线教室B',
-            'status': 'scheduled',
-            'notes': '提高英语口语表达能力，练习日常对话'
+            'max_students': 8,
+            'description': '提高英语口语表达能力，练习日常对话',
+            'status': 'active'
+        },
+        {
+            'teacher_id': teacher_id,
+            'title': '数学基础课程',
+            'subject': '数学',
+            'level': '初级',
+            'start_time': (now + timedelta(days=3)).strftime('%Y-%m-%d %H:%M:%S'),
+            'end_time': (now + timedelta(days=3, hours=1)).strftime('%Y-%m-%d %H:%M:%S'),
+            'location': '在线教室C',
+            'max_students': 15,
+            'description': '数学基础知识学习，包括四则运算、分数、小数等',
+            'status': 'active'
         }
     ]
     
@@ -135,7 +151,7 @@ def create_initial_data():
         course = Course(course_data)
         course.save()
         course_ids.append(course.id)
-        print(f"创建课程: {course.subject} (ID: {course.id})")
+        print(f"创建课程: {course.title} (ID: {course.id})")
     
     # 创建示例题目
     questions_data = [

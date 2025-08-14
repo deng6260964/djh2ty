@@ -105,22 +105,20 @@ class CourseManagement:
                 SET name = ?, description = ?, grade = ?, subject = ?, status = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
             '''
-            db.execute_query(query, (self.name, self.description, self.grade, self.subject, self.status, self.id))
+            db.execute_update(query, (self.name, self.description, self.grade, self.subject, self.status, self.id))
         else:
             # 创建新课程
             query = '''
                 INSERT INTO course_management (teacher_id, name, description, grade, subject, status)
                 VALUES (?, ?, ?, ?, ?, ?)
             '''
-            result = db.execute_query(query, (self.teacher_id, self.name, self.description, self.grade, self.subject, self.status))
-            if result:
-                self.id = db.get_last_insert_id()
+            self.id = db.execute_insert(query, (self.teacher_id, self.name, self.description, self.grade, self.subject, self.status))
     
     def delete(self):
         """删除课程"""
         if self.id:
             query = 'DELETE FROM course_management WHERE id = ?'
-            db.execute_query(query, (self.id,))
+            db.execute_delete(query, (self.id,))
     
     @classmethod
     def count_by_teacher(cls, teacher_id):

@@ -27,7 +27,7 @@ def validate_exam_status(status):
 def get_exams():
     """获取考试列表"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -116,7 +116,7 @@ def get_exams():
 def get_exam(exam_id):
     """获取考试详情"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -182,7 +182,7 @@ def get_exam(exam_id):
 def create_exam():
     """创建考试"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -315,7 +315,7 @@ def create_exam():
 def update_exam(exam_id):
     """更新考试"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -461,7 +461,7 @@ def update_exam(exam_id):
 def start_exam(exam_id):
     """开始考试"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -546,7 +546,7 @@ def start_exam(exam_id):
 def submit_exam(exam_id):
     """提交考试"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -637,7 +637,7 @@ def submit_exam(exam_id):
 def grade_exam(exam_id):
     """批改考试"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -727,7 +727,7 @@ def grade_exam(exam_id):
 def cancel_exam(exam_id):
     """取消考试"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -795,7 +795,7 @@ def cancel_exam(exam_id):
 def delete_exam(exam_id):
     """删除考试"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -857,7 +857,7 @@ def delete_exam(exam_id):
 def get_upcoming_exams():
     """获取即将到来的考试"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -899,7 +899,7 @@ def get_upcoming_exams():
 def get_in_progress_exams():
     """获取正在进行的考试"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -941,7 +941,7 @@ def get_in_progress_exams():
 def get_exam_statistics():
     """获取考试统计信息"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -980,7 +980,7 @@ def get_exam_statistics():
 def get_exam_submissions(exam_id):
     """获取考试提交记录"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:

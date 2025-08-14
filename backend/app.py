@@ -21,7 +21,10 @@ from models.question import Question
 from models.homework import Homework
 from models.exam import Exam
 from models.student import Student
-from models.course_management import CourseManagement
+from models.course_student import CourseStudent
+from models.homework_answer import HomeworkAnswer
+from models.exam_answer import ExamAnswer
+# from models.course_management import CourseManagement
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -35,11 +38,14 @@ def init_db():
     # 创建表
     User.create_table()
     Course.create_table()
+    CourseStudent.create_table()  # 创建课程学生关联表
     Question.create_table()
     Homework.create_table()
     Exam.create_table()
     Student.create_table()
-    CourseManagement.create_table()
+    HomeworkAnswer.create_table()  # 创建作业答案表
+    ExamAnswer.create_table()  # 创建考试答案表
+    # CourseManagement.create_table()  # 已被Course模型替代
 
 # 注册蓝图
 app.register_blueprint(auth_bp)
@@ -63,4 +69,4 @@ def health_check():
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5001)

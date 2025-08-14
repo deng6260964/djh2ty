@@ -46,7 +46,7 @@ const handleLogin = async () => {
     if (response.success) {
       showToast('登录成功')
       // 根据用户角色跳转到不同页面
-      const userInfo: any = response.data?.user_info
+      const userInfo: any = response.data?.user
       if (userInfo?.role === 'teacher') {
         router.push('/teacher/dashboard')
       } else {

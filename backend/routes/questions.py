@@ -31,7 +31,7 @@ def validate_points(points):
 def get_questions():
     """获取题目列表"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -109,7 +109,7 @@ def get_questions():
 def get_question(question_id):
     """获取题目详情"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -162,7 +162,7 @@ def get_question(question_id):
 def create_question():
     """创建题目"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -263,7 +263,7 @@ def create_question():
 def update_question(question_id):
     """更新题目"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -374,7 +374,7 @@ def update_question(question_id):
 def delete_question(question_id):
     """删除题目（软删除）"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -428,7 +428,7 @@ def delete_question(question_id):
 def get_categories():
     """获取题目分类"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -467,7 +467,7 @@ def get_categories():
 def get_statistics():
     """获取题目统计信息"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -506,7 +506,7 @@ def get_statistics():
 def get_random_questions():
     """随机获取题目（用于自动组卷）"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -592,7 +592,7 @@ def get_random_questions():
 def create_questions_batch():
     """批量创建题目"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:
@@ -692,7 +692,7 @@ def create_questions_batch():
 def auto_generate_questions():
     """自动生成题目"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.find_by_id(user_id)
         
         if not user:

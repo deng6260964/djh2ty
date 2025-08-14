@@ -20,8 +20,8 @@ interface UserInfo {
 
 // 登录响应接口
 interface LoginResponse {
-  token: string
-  user_info: UserInfo
+  access_token: string
+  user: UserInfo
 }
 
 // 注册请求接口
@@ -44,7 +44,7 @@ class ApiService {
 
   constructor() {
     this.api = axios.create({
-      baseURL: 'http://localhost:5000/api',
+      baseURL: '/api',
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json'
@@ -144,17 +144,29 @@ class ApiService {
   }
 
   async createCourse(data: any): Promise<ApiResponse> {
-    const response = await this.api.post('/course-management', data)
+    const response = await this.api.post('/courses', data)
     return response.data
   }
 
   async updateCourse(id: number, data: any): Promise<ApiResponse> {
-    const response = await this.api.put(`/course-management/${id}`, data)
+    const response = await this.api.put(`/courses/${id}`, data)
     return response.data
   }
 
   async deleteCourse(id: number): Promise<ApiResponse> {
-    const response = await this.api.delete(`/course-management/${id}`)
+    const response = await this.api.delete(`/courses/${id}`)
+    return response.data
+  }
+
+  // 课程报名
+  async enrollCourse(courseId: number): Promise<ApiResponse> {
+    const response = await this.api.post(`/courses/${courseId}/enroll`)
+    return response.data
+  }
+
+  // 课程退课
+  async dropCourse(courseId: number): Promise<ApiResponse> {
+    const response = await this.api.post(`/courses/${courseId}/drop`)
     return response.data
   }
 
@@ -288,6 +300,21 @@ class ApiService {
     return response.data
   }
 
+  async createStudent(data: any): Promise<ApiResponse> {
+    const response = await this.api.post('/students', data)
+    return response.data
+  }
+
+  async updateStudent(id: number, data: any): Promise<ApiResponse> {
+    const response = await this.api.put(`/students/${id}`, data)
+    return response.data
+  }
+
+  async deleteStudent(id: number): Promise<ApiResponse> {
+    const response = await this.api.delete(`/students/${id}`)
+    return response.data
+  }
+
   // 统计相关API
   async getTeachingStatistics(): Promise<ApiResponse> {
     const response = await this.api.get('/statistics/teaching')
@@ -305,6 +332,27 @@ class ApiService {
         'Content-Type': 'multipart/form-data'
       }
     })
+    return response.data
+  }
+
+  // 通用HTTP方法
+  async get(url: string, config?: any): Promise<ApiResponse> {
+    const response = await this.api.get(url, config)
+    return response.data
+  }
+
+  async post(url: string, data?: any, config?: any): Promise<ApiResponse> {
+    const response = await this.api.post(url, data, config)
+    return response.data
+  }
+
+  async put(url: string, data?: any, config?: any): Promise<ApiResponse> {
+    const response = await this.api.put(url, data, config)
+    return response.data
+  }
+
+  async delete(url: string, config?: any): Promise<ApiResponse> {
+    const response = await this.api.delete(url, config)
     return response.data
   }
 }
