@@ -17,64 +17,84 @@ jwt = JWTManager()
 jwt_middleware = None
 session_manager = None
 
-def create_app(config_name='development'):
+
+def create_app(config_name="development"):
     """应用工厂函数"""
     app = Flask(__name__)
-    
+
     # 加载配置
     from config.config import config
+
     app.config.from_object(config[config_name])
-    
+
     # 初始化配置管理器
     config_manager.create_directories()
-    
+
     # 初始化日志系统
     logger_manager.setup_app_logger(app)
     logger_manager.log_request(app)
     logger_manager.log_error(app)
     logger_manager.setup_security_logger(app)
-    
+
     # 初始化扩展
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    
+
     # 绑定扩展到应用对象，供测试和中间件使用
     app.db = db
     app.jwt = jwt
-    
+
     # 初始化JWT中间件和会话管理器
     global jwt_middleware, session_manager
     jwt_middleware = JWTMiddleware()
     jwt_middleware.init_app(app)
     session_manager = SessionManager()
-    
+
     # 使用配置管理器获取CORS配置
     cors_config = config_manager.get_cors_config()
-    CORS(app, 
-         origins=cors_config['origins'],
-         supports_credentials=True,
-         allow_headers=cors_config['allow_headers'],
-         methods=cors_config['methods'])
-    
+    CORS(
+        app,
+        origins=cors_config["origins"],
+        supports_credentials=True,
+        allow_headers=cors_config["allow_headers"],
+        methods=cors_config["methods"],
+    )
+
     # JWT、中间件和错误处理已通过logger_manager配置
-    
+
     # 注册蓝图
     from app.routes.auth import auth_bp
     from app.routes.users import users_bp
     from app.routes.courses import courses_bp
     from app.routes.assignments import assignments_bp
-    
-    app.register_blueprint(auth_bp, url_prefix='/api/auth')
-    app.register_blueprint(users_bp, url_prefix='/api/users')
-    app.register_blueprint(courses_bp, url_prefix='/api/courses')
-    app.register_blueprint(assignments_bp, url_prefix='/api/assignments')
-    
+    from app.routes.files import files_bp
+    from app.routes.questions import questions_bp
+    from app.routes.exams import exams_bp
+    from app.routes.practices import practices_bp
+    from app.routes.practice_sessions import practice_sessions_bp
+    from app.routes.practice_statistics import practice_statistics_bp
+
+    app.register_blueprint(auth_bp, url_prefix="/api/auth")
+    app.register_blueprint(users_bp, url_prefix="/api/users")
+    app.register_blueprint(courses_bp, url_prefix="/api/courses")
+    app.register_blueprint(assignments_bp, url_prefix="/api/assignments")
+    app.register_blueprint(files_bp, url_prefix="/api/files")
+    app.register_blueprint(questions_bp, url_prefix="/api/questions")
+    app.register_blueprint(exams_bp, url_prefix="/api/exams")
+    app.register_blueprint(practices_bp, url_prefix="/api/practices")
+    app.register_blueprint(practice_sessions_bp)
+    app.register_blueprint(practice_statistics_bp, url_prefix="/api/practice-statistics")
+
     # 健康检查端点
-    @app.route('/api/health')
+    @app.route("/api/health")
     def health_check():
-        return {'status': 'healthy', 'message': 'English Tutoring System API is running', 'timestamp': datetime.utcnow().isoformat()}
-    
+        return {
+            "status": "healthy",
+            "message": "English Tutoring System API is running",
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+
     # 错误处理已通过logger_manager配置
-    
+
     return app

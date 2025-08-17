@@ -17,12 +17,14 @@ def app():
     # 设置测试配置
     test_config = {
         'TESTING': True,
+        'DEBUG': True,  # 启用调试模式
+        'PROPAGATE_EXCEPTIONS': True,  # 传播异常
         'SQLALCHEMY_DATABASE_URI': f'sqlite:///{db_path}',
         'SQLALCHEMY_TRACK_MODIFICATIONS': False,
-        'JWT_SECRET_KEY': 'test-secret-key',
+        'JWT_SECRET_KEY': 'jwt-secret-string',  # 与开发环境保持一致
         'JWT_ACCESS_TOKEN_EXPIRES': timedelta(hours=1),
         'JWT_REFRESH_TOKEN_EXPIRES': timedelta(days=1),
-        'SECRET_KEY': 'test-secret-key',
+        'SECRET_KEY': 'dev-secret-key-change-in-production',  # 与开发环境保持一致
         'WTF_CSRF_ENABLED': False
     }
     
