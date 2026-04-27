@@ -1,0 +1,235 @@
+/* pages/feedback-detail/feedback-detail.wxss */
+
+.page-container {
+  background: #F8FAFC;
+  min-height: 100vh;
+  padding-bottom: 80rpx;
+}
+
+/* 骨架屏 */
+.skeleton-wrap {
+  padding: 16rpx 24rpx;
+}
+
+.skeleton-header-card, .skeleton-content-card {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 16rpx;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 50%, #E5E7EB 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8rpx;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.sk-title {
+  width: 60%;
+  height: 32rpx;
+}
+
+.sk-meta {
+  width: 40%;
+  height: 24rpx;
+}
+
+.sk-section-title {
+  width: 35%;
+  height: 28rpx;
+  margin-bottom: 20rpx;
+}
+
+.sk-line {
+  width: 90%;
+  height: 26rpx;
+}
+
+.sk-line.long {
+  width: 100%;
+}
+
+.sk-line.short {
+  width: 60%;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 顶部课程信息卡片 */
+.course-header-card {
+  background: #2563EB;
+  padding: 32rpx;
+  margin-bottom: 0;
+}
+
+.course-header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.course-badge-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.subject-badge {
+  background: rgba(255, 255, 255, 0.25);
+  padding: 6rpx 20rpx;
+  border-radius: 8rpx;
+}
+
+.subject-text {
+  font-size: 24rpx;
+  color: #FFFFFF;
+  font-weight: 500;
+}
+
+.course-date-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.feedback-time {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.feedback-meta-row {
+  display: flex;
+  align-items: center;
+}
+
+.feedback-meta-label {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.feedback-meta-value {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 反馈区块 */
+.feedback-section {
+  background: #FFFFFF;
+  margin: 16rpx 24rpx 0;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 28rpx 16rpx;
+  border-bottom: 1rpx solid #F3F4F6;
+  gap: 16rpx;
+}
+
+.section-icon {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.performance-icon {
+  background: #FFFBEB;
+}
+
+.knowledge-icon {
+  background: #EFF6FF;
+}
+
+.problems-icon {
+  background: #FEF2F2;
+}
+
+.plan-icon {
+  background: #ECFDF5;
+}
+
+.icon-emoji {
+  font-size: 28rpx;
+  line-height: 1;
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #111827;
+}
+
+.section-content {
+  padding: 24rpx 28rpx;
+}
+
+.feedback-text {
+  font-size: 28rpx;
+  color: #374151;
+  line-height: 1.8;
+}
+
+/* 空反馈内容提示 */
+.empty-feedback {
+  background: #FFFFFF;
+  margin: 16rpx 24rpx 0;
+  border-radius: 16rpx;
+  padding: 48rpx;
+  text-align: center;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.empty-feedback-text {
+  font-size: 26rpx;
+  color: #9CA3AF;
+}
+
+/* 底部时间戳 */
+.footer-info {
+  padding: 32rpx;
+  text-align: center;
+}
+
+.footer-text {
+  font-size: 22rpx;
+  color: #D1D5DB;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 0 80rpx;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 32rpx;
+  opacity: 0.5;
+}
+
+.empty-title {
+  font-size: 30rpx;
+  color: #374151;
+  font-weight: 500;
+  margin-bottom: 12rpx;
+}
+
+.empty-desc {
+  font-size: 26rpx;
+  color: #9CA3AF;
+}

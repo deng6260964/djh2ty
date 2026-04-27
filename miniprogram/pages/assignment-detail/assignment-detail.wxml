@@ -1,0 +1,108 @@
+<!-- pages/assignment-detail/assignment-detail.wxml -->
+<view class="page-container">
+
+  <!-- 加载中骨架 -->
+  <view wx:if="{{loading}}" class="skeleton-wrap">
+    <view class="skeleton-header">
+      <view class="skeleton skeleton-title-big"></view>
+      <view class="skeleton skeleton-meta"></view>
+    </view>
+    <view class="skeleton-section">
+      <view class="skeleton skeleton-line"></view>
+      <view class="skeleton skeleton-line long"></view>
+      <view class="skeleton skeleton-line"></view>
+    </view>
+  </view>
+
+  <!-- 作业内容 -->
+  <block wx:elif="{{assignment}}">
+
+    <!-- 顶部作业信息 -->
+    <view class="assignment-header">
+      <text class="assignment-title">{{assignment.title}}</text>
+
+      <view class="header-meta">
+        <view class="subject-badge">
+          <text class="subject-text">{{assignment.subject}}</text>
+        </view>
+        <view class="status-badge {{assignment.isGraded ? 'graded' : assignment.isSubmitted ? 'submitted' : 'pending'}}">
+          <text class="status-text">
+            {{assignment.isGraded ? '已批改' : assignment.isSubmitted ? '已提交' : '未提交'}}
+          </text>
+        </view>
+      </view>
+
+      <view class="date-info">
+        <text class="date-item">布置：{{assignment.createdDateStr}}</text>
+        <text class="date-separator">·</text>
+        <text class="date-item {{assignment.dueStatus.urgent ? 'urgent' : ''}}">截止：{{assignment.dueDateStr}}</text>
+      </view>
+
+      <!-- 截止状态提示 -->
+      <view class="due-tip" wx:if="{{assignment.dueStatus.text && !assignment.isSubmitted}}">
+        <text class="due-tip-text" style="color: {{assignment.dueStatus.color}};">{{assignment.dueStatus.text}}</text>
+      </view>
+    </view>
+
+    <!-- 分割线 -->
+    <view class="section-divider">
+      <text class="section-label">作业内容</text>
+    </view>
+
+    <!-- 作业正文（富文本） -->
+    <view class="content-section">
+      <rich-text nodes="{{assignment.content}}" class="rich-content"></rich-text>
+      <text class="plain-content" wx:if="{{!assignment.content}}">暂无作业内容</text>
+    </view>
+
+    <!-- 批改结果（已批改后显示） -->
+    <view wx:if="{{assignment.isGraded}}">
+      <view class="section-divider">
+        <text class="section-label">批改结果</text>
+        <text class="section-date" wx:if="{{assignment.gradedDateStr}}">{{assignment.gradedDateStr}}</text>
+      </view>
+
+      <view class="grade-section">
+        <!-- 分数展示 -->
+        <view class="score-display">
+          <view class="score-wrap">
+            <text class="score-number">{{assignment.score}}</text>
+            <text class="score-full">/{{assignment.full_score || 100}}</text>
+          </view>
+          <view class="score-grade-badge">
+            <text class="score-grade">{{assignment.scoreGrade}}</text>
+          </view>
+        </view>
+
+        <!-- 评语 -->
+        <view class="comment-wrap" wx:if="{{assignment.comment}}">
+          <text class="comment-label">老师评语</text>
+          <rich-text nodes="{{assignment.comment}}" class="comment-content"></rich-text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 已提交未批改 -->
+    <view wx:elif="{{assignment.isSubmitted && !assignment.isGraded}}">
+      <view class="section-divider">
+        <text class="section-label">提交状态</text>
+      </view>
+      <view class="submitted-tip">
+        <text class="submitted-icon">✅</text>
+        <view class="submitted-info">
+          <text class="submitted-title">已提交，等待老师批改</text>
+          <text class="submitted-date" wx:if="{{assignment.submittedDateStr}}">提交时间：{{assignment.submittedDateStr}}</text>
+        </view>
+      </view>
+    </view>
+
+  </block>
+
+  <!-- 空状态 -->
+  <view wx:elif="{{!loading}}" class="empty-state">
+    <text class="empty-icon">📄</text>
+    <text class="empty-title">作业不存在</text>
+    <text class="empty-desc">该作业可能已被删除</text>
+  </view>
+
+</view>

@@ -1,0 +1,141 @@
+<!-- pages/progress/progress.wxml -->
+<view class="page-container">
+
+  <!-- 科目切换 Tab -->
+  <view class="subject-tabs-wrap">
+    <scroll-view scroll-x class="subject-tabs" enhanced>
+      <view class="tabs-inner">
+        <view
+          wx:for="{{subjects}}"
+          wx:key="index"
+          class="subject-tab {{activeSubjectIndex === index ? 'active' : ''}}"
+          bindtap="switchSubject"
+          data-index="{{index}}"
+        >
+          <text class="subject-tab-text">{{item}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 无科目时 -->
+  <view wx:if="{{subjects.length === 0 && !loading}}" class="empty-state">
+    <text class="empty-icon">📊</text>
+    <text class="empty-title">暂无成绩记录</text>
+    <text class="empty-desc">老师会在课后为你记录学习进度</text>
+  </view>
+
+  <block wx:else>
+
+    <!-- 成绩趋势图表卡片 -->
+    <view class="chart-card">
+      <view class="card-title-row">
+        <text class="card-title">成绩趋势</text>
+        <text class="card-subtitle" wx:if="{{activeSubject}}">{{activeSubject}}</text>
+      </view>
+
+      <!-- 加载骨架 -->
+      <view wx:if="{{loading}}" class="chart-skeleton">
+        <view class="skeleton chart-placeholder"></view>
+      </view>
+
+      <!-- 折线图 -->
+      <view wx:elif="{{hasGradeData}}">
+        <!-- 新版 Canvas -->
+        <canvas
+          id="gradeChart"
+          type="2d"
+          class="grade-canvas"
+          style="width: {{canvasWidth}}px; height: {{canvasHeight}}px;"
+        ></canvas>
+        <!-- 旧版兼容 Canvas（隐藏，备用） -->
+        <canvas
+          canvas-id="gradeChart"
+          class="grade-canvas-legacy"
+          style="width: {{canvasWidth}}px; height: {{canvasHeight}}px; display: none;"
+        ></canvas>
+
+        <!-- 最近成绩列表 -->
+        <view class="recent-scores">
+          <view
+            wx:for="{{gradeData}}"
+            wx:key="index"
+            class="score-item"
+          >
+            <text class="score-date">{{item.dateLabel}}</text>
+            <text class="score-name" wx:if="{{item.exam_name}}">{{item.exam_name}}</text>
+            <text class="score-value">{{item.score}}分</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 无成绩数据 -->
+      <view wx:elif="{{!loading}}" class="chart-empty">
+        <text class="chart-empty-text">暂无成绩记录</text>
+      </view>
+    </view>
+
+    <!-- 知识点掌握卡片 -->
+    <view class="knowledge-card">
+      <view class="card-title-row">
+        <text class="card-title">知识点掌握</text>
+        <!-- 统计徽标 -->
+        <view class="stats-badges">
+          <view class="stat-badge mastered">
+            <text class="stat-num">{{masteredCount}}</text>
+            <text class="stat-label">已掌握</text>
+          </view>
+          <view class="stat-badge learning">
+            <text class="stat-num">{{learningCount}}</text>
+            <text class="stat-label">学习中</text>
+          </view>
+          <view class="stat-badge todo">
+            <text class="stat-num">{{todoCount}}</text>
+            <text class="stat-label">待学习</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 加载骨架 -->
+      <view wx:if="{{loading}}">
+        <view class="kp-skeleton" wx:for="{{[1,2,3,4,5]}}" wx:key="index">
+          <view class="skeleton sk-kp-icon"></view>
+          <view class="skeleton sk-kp-text"></view>
+          <view class="skeleton sk-kp-status"></view>
+        </view>
+      </view>
+
+      <!-- 知识点列表 -->
+      <view wx:elif="{{hasKnowledgeData}}">
+        <view
+          wx:for="{{knowledgePoints}}"
+          wx:key="id"
+          class="knowledge-item"
+        >
+          <!-- 状态图标 -->
+          <view class="kp-status-icon" style="background: {{item.statusInfo.color}}20; border: 2rpx solid {{item.statusInfo.color}};">
+            <text class="kp-status-symbol" style="color: {{item.statusInfo.color}};">{{item.statusInfo.icon}}</text>
+          </view>
+
+          <!-- 知识点信息 -->
+          <view class="kp-info">
+            <text class="kp-name">{{item.point_name}}</text>
+            <text class="kp-chapter" wx:if="{{item.chapter}}">{{item.chapter}}</text>
+          </view>
+
+          <!-- 状态标签 -->
+          <view class="kp-status-tag" style="background: {{item.statusInfo.color}}20;">
+            <text class="kp-status-text" style="color: {{item.statusInfo.color}};">{{item.statusInfo.text}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 无知识点数据 -->
+      <view wx:elif="{{!loading}}" class="knowledge-empty">
+        <text class="knowledge-empty-text">老师尚未添加知识点记录</text>
+      </view>
+    </view>
+
+  </block>
+
+</view>

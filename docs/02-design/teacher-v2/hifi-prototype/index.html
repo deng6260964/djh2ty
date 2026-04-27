@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>家教辅助系统 V2 高保真原型</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <div class="brand-mark">知</div>
+          <div>
+            <div class="brand-title">家教辅助系统 V2</div>
+            <div class="brand-subtitle">Teacher Workbench Hi-Fi Prototype</div>
+          </div>
+        </div>
+
+        <nav class="top-nav">
+          <button class="top-nav__item is-active" data-screen="dashboard">老师工作台</button>
+          <button class="top-nav__item" data-screen="calendar">课程总览</button>
+          <button class="top-nav__item" data-screen="operations">调课与请假</button>
+          <button class="top-nav__item" data-screen="course">课程详情</button>
+          <button class="top-nav__item" data-screen="student">学生档案</button>
+          <button class="top-nav__item" data-screen="assignments">作业中心</button>
+          <button class="top-nav__item" data-screen="settings">设置中心</button>
+        </nav>
+
+        <div class="topbar-actions">
+          <div class="search-pill">搜索学生 / 课程 / 作业</div>
+          <div class="avatar">
+            <div class="avatar__dot"></div>
+            周老师
+          </div>
+        </div>
+      </header>
+
+      <main class="stage">
+        <section class="screen is-active" id="dashboard">
+          <div class="hero">
+            <div class="hero__copy">
+              <div class="eyebrow">Daily Workbench</div>
+              <h1>今天不是看报表，而是把该做的事推进完。</h1>
+              <p>
+                首页第一屏只服务高频动作：待补记录、今日课程、待收费提醒、待批改作业，以及最短路径的排课和收款。
+              </p>
+            </div>
+            <div class="hero__aside">
+              <div class="mini-stat">
+                <span>待补记录</span>
+                <strong>3</strong>
+              </div>
+              <div class="mini-stat">
+                <span>待收费</span>
+                <strong>2</strong>
+              </div>
+              <div class="mini-stat">
+                <span>待批改</span>
+                <strong>4</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="app-frame">
+            <aside class="sidebar">
+              <div class="sidebar__section">
+                <div class="sidebar__label">主导航</div>
+                <div class="side-item is-active">
+                  <span>工作台</span>
+                  <em>09</em>
+                </div>
+                <div class="side-item">
+                  <span>课程</span>
+                  <em>16</em>
+                </div>
+                <div class="side-item">
+                  <span>学生</span>
+                  <em>32</em>
+                </div>
+                <div class="side-item">
+                  <span>作业</span>
+                  <em>04</em>
+                </div>
+                <div class="side-item">
+                  <span>资料</span>
+                  <em>12</em>
+                </div>
+                <div class="side-item">
+                  <span>设置</span>
+                  <em>02</em>
+                </div>
+              </div>
+
+              <div class="sidebar__section sidebar__section--soft">
+                <div class="sidebar__label">今日重点</div>
+                <div class="note-card">
+                  <strong>课后闭环优先</strong>
+                  <p>先处理 3 节“已上课待记录”，避免课程、扣费和提醒链路断开。</p>
+                </div>
+              </div>
+            </aside>
+
+            <section class="workspace">
+              <div class="workspace__toolbar">
+                <div>
+                  <div class="workspace__title">4 月 21 日老师工作台</div>
+                  <div class="workspace__subtitle">周二 · 先处理课后记录，再处理收费提醒</div>
+                </div>
+                <div class="workspace__actions">
+                  <button class="btn btn--ghost">今天</button>
+                  <button class="btn btn--primary">快速排课</button>
+                </div>
+              </div>
+
+              <div class="metric-row">
+                <article class="metric-card metric-card--warm">
+                  <div class="metric-card__label">待补记录</div>
+                  <div class="metric-card__value">3</div>
+                  <div class="metric-card__hint">课已结束，但记录和扣费还没闭环</div>
+                </article>
+                <article class="metric-card">
+                  <div class="metric-card__label">今日课程</div>
+                  <div class="metric-card__value">5</div>
+                  <div class="metric-card__hint">3 节常规课，2 节临时加课</div>
+                </article>
+                <article class="metric-card metric-card--danger">
+                  <div class="metric-card__label">待收费</div>
+                  <div class="metric-card__value">2</div>
+                  <div class="metric-card__hint">余额不足覆盖下一节课</div>
+                </article>
+                <article class="metric-card">
+                  <div class="metric-card__label">待批改</div>
+                  <div class="metric-card__value">4</div>
+                  <div class="metric-card__hint">其中 1 份已逾期 12 小时</div>
+                </article>
+              </div>
+
+              <div class="dashboard-grid">
+                <section class="panel panel--lg">
+                  <div class="panel__header">
+                    <div>
+                      <h3>今日课程</h3>
+                      <p>时间顺序 + 风险信息一起显示，老师不用切页判断优先级。</p>
+                    </div>
+                    <button class="panel-link">查看全部</button>
+                  </div>
+
+                  <div class="lesson-list">
+                    <article class="lesson-card">
+                      <div class="lesson-card__left">
+                        <div class="lesson-time">09:00 - 10:30</div>
+                        <div class="lesson-title">王小明 · 数学专题练习</div>
+                        <div class="lesson-meta">1.5 小时 · 余额正常 · 上次作业已批改</div>
+                      </div>
+                      <div class="pill pill--ok">待上课</div>
+                    </article>
+
+                    <article class="lesson-card lesson-card--warning">
+                      <div class="lesson-card__left">
+                        <div class="lesson-time">14:00 - 15:00</div>
+                        <div class="lesson-title">李佳怡 · 物理压轴题训练</div>
+                        <div class="lesson-meta">已结束 · 记录未完成 · 扣费尚未执行</div>
+                      </div>
+                      <div class="pill pill--warn">待记录</div>
+                    </article>
+
+                    <article class="lesson-card lesson-card--danger">
+                      <div class="lesson-card__left">
+                        <div class="lesson-time">16:30 - 18:00</div>
+                        <div class="lesson-title">陈子轩 · 英语阅读与词汇</div>
+                        <div class="lesson-meta">1.5 小时 · 当前余额 ¥120 · 下一节前建议收费</div>
+                      </div>
+                      <div class="pill pill--danger">余额预警</div>
+                    </article>
+                  </div>
+                </section>
+
+                <section class="panel">
+                  <div class="panel__header">
+                    <div>
+                      <h3>待补记录</h3>
+                      <p>优先级最高的动作区。</p>
+                    </div>
+                  </div>
+
+                  <div class="stack-list">
+                    <article class="stack-item">
+                      <div class="stack-item__title">李佳怡 · 物理课</div>
+                      <div class="stack-item__desc">17:00 结束 · 本节还未补记录，也未扣费</div>
+                      <button class="chip-action">去补记录</button>
+                    </article>
+                    <article class="stack-item">
+                      <div class="stack-item__title">王小明 · 数学课</div>
+                      <div class="stack-item__desc">昨天 19:00 结束 · 已写摘要但未完成闭环</div>
+                      <button class="chip-action">继续补完</button>
+                    </article>
+                  </div>
+                </section>
+
+                <section class="panel">
+                  <div class="panel__header">
+                    <div>
+                      <h3>待收费提醒</h3>
+                      <p>不是财务系统，是跟随课程节奏的待办。</p>
+                    </div>
+                  </div>
+
+                  <div class="fee-alert">
+                    <strong>陈子轩</strong>
+                    <p>当前余额 ¥120，下一节课预计扣费 ¥180，还差 ¥60。</p>
+                    <div class="fee-alert__actions">
+                      <button class="btn btn--ghost btn--small">查看账户</button>
+                      <button class="btn btn--primary btn--small">录入收款</button>
+                    </div>
+                  </div>
+
+                  <div class="fee-alert fee-alert--soft">
+                    <strong>周思远</strong>
+                    <p>当前余额 ¥90，下一节课预计扣费 ¥120，还差 ¥30。</p>
+                    <div class="fee-alert__actions">
+                      <button class="btn btn--ghost btn--small">查看账户</button>
+                      <button class="btn btn--primary btn--small">录入收款</button>
+                    </div>
+                  </div>
+
+                  <div class="inline-modal">
+                    <div class="inline-modal__header">
+                      <strong>快捷收款弹窗</strong>
+                      <span class="pill pill--soft">不离开工作台</span>
+                    </div>
+                    <div class="mock-form">
+                      <div class="mock-input">学生：陈子轩</div>
+                      <div class="mock-input">收款金额：1000</div>
+                      <div class="mock-input">收款时间：2026-04-21 18:30</div>
+                      <div class="mock-input">收款方式：微信转账</div>
+                    </div>
+                    <div class="inline-status inline-status--ok">收款后余额预计：¥1120，收费风险自动解除</div>
+                  </div>
+                </section>
+
+                <section class="panel">
+                  <div class="panel__header">
+                    <div>
+                      <h3>待批改作业</h3>
+                      <p>集中处理跨学生任务。</p>
+                    </div>
+                  </div>
+
+                  <div class="stack-list">
+                    <article class="stack-item">
+                      <div class="stack-item__title">王小明 · 数学练习册第 3 章</div>
+                      <div class="stack-item__desc">20:12 提交 · 来源于 4/20 晚课</div>
+                      <button class="chip-action">去批改</button>
+                    </article>
+                    <article class="stack-item">
+                      <div class="stack-item__title">陈子轩 · 英语单词默写</div>
+                      <div class="stack-item__desc">19:05 提交 · 需要打分与评语</div>
+                      <button class="chip-action">去批改</button>
+                    </article>
+                  </div>
+                </section>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="screen" id="calendar">
+          <div class="screen-heading">
+            <div class="eyebrow">Course Overview</div>
+            <h2>课程页先解决排课、看冲突、看余额风险，再进入单节课详情。</h2>
+          </div>
+
+          <div class="calendar-layout">
+            <section class="calendar-board">
+              <div class="calendar-toolbar">
+                <div>
+                  <div class="calendar-title">2026 年 4 月第 4 周</div>
+                  <div class="calendar-subtitle">完整 7 天周视图，覆盖工作日与周末排课高峰</div>
+                </div>
+                <div class="workspace__actions">
+                  <button class="btn btn--ghost">今天</button>
+                  <button class="btn btn--ghost">复制上一周</button>
+                  <button class="btn btn--primary">快速排课</button>
+                </div>
+              </div>
+
+              <div class="filter-row">
+                <div class="filter-pill">学生：全部</div>
+                <div class="filter-pill">科目：全部</div>
+                <div class="filter-pill">状态：全部</div>
+                <div class="filter-pill">仅看待记录</div>
+              </div>
+
+              <div class="week-grid">
+                <div class="week-head">
+                  <div>时间</div>
+                  <div>周一 4/20</div>
+                  <div>周二 4/21</div>
+                  <div>周三 4/22</div>
+                  <div>周四 4/23</div>
+                  <div>周五 4/24</div>
+                  <div class="weekend-head">周六 4/25</div>
+                  <div class="weekend-head">周日 4/26</div>
+                </div>
+
+                <div class="week-row">
+                  <div class="time-slot">09:00</div>
+                  <div class="schedule-card">
+                    <strong>王小明</strong>
+                    <span>数学 · 1.5h</span>
+                    <em>待上课</em>
+                  </div>
+                  <div class="schedule-card schedule-card--warning">
+                    <strong>李佳怡</strong>
+                    <span>物理 · 1.0h</span>
+                    <em>待记录</em>
+                  </div>
+                  <div class="schedule-empty">+</div>
+                  <div class="schedule-empty">+</div>
+                  <div class="schedule-empty">+</div>
+                  <div class="schedule-card schedule-card--weekend">
+                    <strong>赵雨桐</strong>
+                    <span>数学 · 2.0h</span>
+                    <em>周末主课</em>
+                  </div>
+                  <div class="schedule-card schedule-card--weekend">
+                    <strong>孙浩然</strong>
+                    <span>英语 · 1.5h</span>
+                    <em>周末主课</em>
+                  </div>
+                </div>
+
+                <div class="week-row">
+                  <div class="time-slot">16:30</div>
+                  <div class="schedule-empty">+</div>
+                  <div class="schedule-card schedule-card--danger">
+                    <strong>陈子轩</strong>
+                    <span>英语 · 1.5h</span>
+                    <em>余额预警</em>
+                  </div>
+                  <div class="schedule-card">
+                    <strong>周思远</strong>
+                    <span>数学 · 1.0h</span>
+                    <em>待上课</em>
+                  </div>
+                  <div class="schedule-empty">+</div>
+                  <div class="schedule-card schedule-card--weekend">
+                    <strong>李沐宸</strong>
+                    <span>物理 · 1.5h</span>
+                    <em>待上课</em>
+                  </div>
+                  <div class="schedule-card schedule-card--weekend schedule-card--danger">
+                    <strong>陈子轩</strong>
+                    <span>英语 · 1.5h</span>
+                    <em>周日前需收费</em>
+                  </div>
+                </div>
+
+                <div class="week-row">
+                  <div class="time-slot">19:30</div>
+                  <div class="schedule-empty">+</div>
+                  <div class="schedule-empty">+</div>
+                  <div class="schedule-empty">+</div>
+                  <div class="schedule-card">
+                    <strong>王小明</strong>
+                    <span>数学 · 1.5h</span>
+                    <em>晚间加课</em>
+                  </div>
+                  <div class="schedule-empty">+</div>
+                  <div class="schedule-card schedule-card--weekend">
+                    <strong>周思远</strong>
+                    <span>数学 · 1.5h</span>
+                    <em>周六晚课</em>
+                  </div>
+                  <div class="schedule-empty">+</div>
+                </div>
+              </div>
+            </section>
+
+            <aside class="quick-panel">
+              <div class="rail-card">
+                <h4>快速排课弹窗</h4>
+                <div class="mock-form">
+                  <div class="mock-input">学生：陈子轩</div>
+                  <div class="mock-input">科目：英语</div>
+                  <div class="mock-input">日期：2026-04-26（周日）</div>
+                  <div class="mock-input">开始时间：16:30</div>
+                  <div class="mock-input">计划课时：1.5 小时</div>
+                </div>
+                <div class="inline-status inline-status--ok">冲突检测：无冲突</div>
+                <div class="inline-status inline-status--danger">余额提示：当前余额不足覆盖本次周日课程，建议周六前收费</div>
+                <button class="btn btn--primary btn--small" style="margin-top: 14px;">保存排课</button>
+              </div>
+
+              <div class="rail-card rail-card--soft" style="margin-top: 14px;">
+                <h4>复制上一周课程</h4>
+                <div class="copy-summary">
+                  <div class="copy-summary__row">
+                    <span>来源周</span>
+                    <strong>4/13 - 4/19</strong>
+                  </div>
+                  <div class="copy-summary__row">
+                    <span>待复制课程</span>
+                    <strong>8 节</strong>
+                  </div>
+                  <div class="copy-summary__row">
+                    <span>系统预判</span>
+                    <strong>1 节冲突 · 2 节需收费提醒</strong>
+                  </div>
+                </div>
+
+                <div class="copy-preview">
+                  <div class="copy-preview__item">
+                    <div>
+                      <strong>王小明 · 周四 19:30 数学</strong>
+                      <p>可直接复制到本周</p>
+                    </div>
+                    <span class="pill pill--ok">可复制</span>
+                  </div>
+                  <div class="copy-preview__item">
+                    <div>
+                      <strong>陈子轩 · 周日 16:30 英语</strong>
+                      <p>复制后余额不足覆盖该课</p>
+                    </div>
+                    <span class="pill pill--danger">需收费</span>
+                  </div>
+                  <div class="copy-preview__item">
+                    <div>
+                      <strong>赵雨桐 · 周六 09:00 数学</strong>
+                      <p>与当前已排课程时间冲突</p>
+                    </div>
+                    <span class="pill pill--warn">冲突</span>
+                  </div>
+                </div>
+
+                <button class="btn btn--primary btn--small" style="margin-top: 14px;">打开批量复制弹窗</button>
+              </div>
+
+              <div class="rail-card" style="margin-top: 14px;">
+                <h4>批量复制弹窗预览</h4>
+                <div class="copy-modal">
+                  <div class="copy-modal__header">
+                    <div>
+                      <strong>复制上一周课程</strong>
+                      <p>从 4/13 - 4/19 复制到 4/20 - 4/26</p>
+                    </div>
+                    <span class="pill pill--soft">共 8 节</span>
+                  </div>
+
+                  <div class="copy-modal__toolbar">
+                    <div class="filter-pill">默认全选可复制课程</div>
+                    <div class="filter-pill">跳过冲突课程</div>
+                  </div>
+
+                  <div class="copy-modal__list">
+                    <div class="copy-row copy-row--ok">
+                      <label class="copy-check">
+                        <input type="checkbox" checked />
+                        <span></span>
+                      </label>
+                      <div class="copy-row__body">
+                        <strong>王小明 · 周四 19:30 数学课</strong>
+                        <p>复制到本周四 19:30，无冲突，余额正常。</p>
+                      </div>
+                      <span class="pill pill--ok">可复制</span>
+                    </div>
+
+                    <div class="copy-row copy-row--danger">
+                      <label class="copy-check">
+                        <input type="checkbox" checked />
+                        <span></span>
+                      </label>
+                      <div class="copy-row__body">
+                        <strong>陈子轩 · 周日 16:30 英语课</strong>
+                        <p>可复制，但复制后余额不足覆盖该课，系统会自动加入待收费提醒。</p>
+                      </div>
+                      <span class="pill pill--danger">需收费</span>
+                    </div>
+
+                    <div class="copy-row copy-row--warn">
+                      <label class="copy-check">
+                        <input type="checkbox" />
+                        <span></span>
+                      </label>
+                      <div class="copy-row__body">
+                        <strong>赵雨桐 · 周六 09:00 数学课</strong>
+                        <p>目标时间段已存在课程，默认不勾选，建议老师先调课或跳过。</p>
+                      </div>
+                      <span class="pill pill--warn">冲突</span>
+                    </div>
+                  </div>
+
+                  <div class="copy-modal__footer">
+                    <div class="copy-result">
+                      <span>本次将复制 7 节课</span>
+                      <strong>其中 2 节会触发收费提醒</strong>
+                    </div>
+                    <div class="workspace__actions">
+                      <button class="btn btn--ghost btn--small">取消</button>
+                      <button class="btn btn--primary btn--small">确认复制</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="screen" id="operations">
+          <div class="screen-heading">
+            <div class="eyebrow">Schedule Operations</div>
+            <h2>调课、请假、取消课与待补课，都应该在课程体系里顺着处理完。</h2>
+          </div>
+
+          <div class="operations-layout">
+            <section class="operations-main">
+              <div class="panel__header">
+                <div>
+                  <h3>课程调整中心</h3>
+                  <p>集中处理调课、学生请假、老师请假、取消课和转补课，避免老师继续依赖微信碎片化沟通。</p>
+                </div>
+              </div>
+
+              <div class="ops-cards">
+                <article class="ops-card">
+                  <div class="ops-card__head">
+                    <strong>陈子轩 · 周日 16:30 英语课</strong>
+                    <span class="pill pill--warn">待处理</span>
+                  </div>
+                  <p>家长反馈周日外出，希望改到周六 19:30。系统需同步检查时间冲突和余额风险。</p>
+                  <div class="ops-actions">
+                    <button class="btn btn--ghost btn--small">调课</button>
+                    <button class="btn btn--ghost btn--small">学生请假</button>
+                    <button class="btn btn--ghost btn--small">取消课</button>
+                  </div>
+                </article>
+
+                <article class="ops-card ops-card--soft">
+                  <div class="ops-card__head">
+                    <strong>周思远 · 周六 19:30 数学课</strong>
+                    <span class="pill pill--danger">建议转补课</span>
+                  </div>
+                  <p>若老师临时有事，系统推荐改到周日 19:30，并将原课标记为“老师请假待补”。</p>
+                  <div class="ops-actions">
+                    <button class="btn btn--ghost btn--small">改到周日</button>
+                    <button class="btn btn--ghost btn--small">标记待补</button>
+                  </div>
+                </article>
+              </div>
+
+              <div class="modal-preview-grid">
+                <div class="modal-card">
+                  <div class="inline-modal__header">
+                    <strong>调课弹窗</strong>
+                    <span class="pill pill--soft">保留课次</span>
+                  </div>
+                  <div class="mock-form">
+                    <div class="mock-input">原课程：陈子轩 · 4/26 周日 16:30</div>
+                    <div class="mock-input">新日期：2026-04-25（周六）</div>
+                    <div class="mock-input">新时间：19:30</div>
+                    <div class="mock-input">处理方式：调课，不计缺课</div>
+                  </div>
+                  <div class="inline-status inline-status--ok">冲突检测：无冲突，可直接调课</div>
+                  <div class="inline-status inline-status--danger">余额提醒：调课后仍需在课前收费</div>
+                </div>
+
+                <div class="modal-card">
+                  <div class="inline-modal__header">
+                    <strong>请假 / 取消课弹窗</strong>
+                    <span class="pill pill--warn">必须记录原因</span>
+                  </div>
+                  <div class="mock-form">
+                    <div class="mock-input">操作类型：学生请假</div>
+                    <div class="mock-input">处理方式：本周不扣费，转入待补课</div>
+                    <div class="mock-input mock-input--tall">备注：周末家庭出行，家长希望下周补上。</div>
+                  </div>
+                  <div class="inline-status inline-status--ok">系统结果：课程移出本周日程，并保留待补标记与处理记录</div>
+                </div>
+              </div>
+            </section>
+
+            <aside class="quick-panel">
+              <div class="rail-card rail-card--soft">
+                <h4>操作规则</h4>
+                <div class="tag-line">调课优先，不建议直接删课</div>
+                <div class="tag-line">请假默认不扣费</div>
+                <div class="tag-line">取消课必须保留原因</div>
+                <div class="tag-line">若已扣费，取消时要支持余额回滚</div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="screen" id="course">
+          <div class="screen-heading">
+            <div class="eyebrow">Course Workflow</div>
+            <h2>课程详情不是详情页，而是老师完成一节课的主战场。</h2>
+          </div>
+
+          <div class="course-layout">
+            <section class="detail-card">
+              <div class="detail-card__header">
+                <div>
+                  <div class="detail-card__title">陈子轩 · 英语阅读与词汇</div>
+                  <div class="detail-card__subtitle">2026-04-21 16:30 - 18:00 · 计划课时 1.5h</div>
+                </div>
+                <div class="pill pill--warn">已上课待记录</div>
+              </div>
+
+              <div class="detail-section">
+                <div class="detail-section__title">课前速览</div>
+                <div class="quick-facts">
+                  <div class="fact-card">
+                    <span>最近反馈</span>
+                    <strong>口语积极，但拼写反复出错</strong>
+                  </div>
+                  <div class="fact-card">
+                    <span>最近作业</span>
+                    <strong>已提交，老师待批改</strong>
+                  </div>
+                  <div class="fact-card">
+                    <span>当前余额</span>
+                    <strong>¥120</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <div class="detail-section__title">课后记录</div>
+                <div class="form-grid">
+                  <label class="field">
+                    <span>实际课时</span>
+                    <div class="field-box">1.5 小时</div>
+                  </label>
+                  <label class="field">
+                    <span>是否需要家长关注</span>
+                    <div class="field-box">需要</div>
+                  </label>
+                  <label class="field field--full">
+                    <span>本节内容</span>
+                    <div class="field-box field-box--textarea">
+                      阅读理解 + 高频词汇巩固，重点训练 sentence locating 与拼写纠错。
+                    </div>
+                  </label>
+                  <label class="field field--full">
+                    <span>学生表现</span>
+                    <div class="field-box field-box--textarea">
+                      课堂参与积极，表达欲明显增强，但书写拼写仍不稳定，需要课后强化复习。
+                    </div>
+                  </label>
+                  <label class="field field--full">
+                    <span>问题与风险</span>
+                    <div class="field-box field-box--textarea">
+                      若拼写不持续纠正，后续阅读题和写作题都会受到影响。
+                    </div>
+                  </label>
+                  <label class="field field--full">
+                    <span>下节安排</span>
+                    <div class="field-box field-box--textarea">
+                      继续做词汇默写，并配合短篇阅读做关键词定位训练。
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <div class="detail-section__title">本节作业</div>
+                <div class="assignment-card">
+                  <div class="assignment-card__left">
+                    <strong>英语单词默写 40 个 + Unit 5 阅读 1 篇</strong>
+                    <span>截止 4 月 23 日 20:00 · 会同步到学生端作业列表</span>
+                  </div>
+                  <div class="pill pill--soft">已关联本节课</div>
+                </div>
+              </div>
+            </section>
+
+            <aside class="charge-card">
+              <div class="charge-card__head">
+                <div class="eyebrow eyebrow--small">Auto Billing</div>
+                <h3>完成课程后自动扣费</h3>
+              </div>
+
+              <div class="charge-block">
+                <span>课时单价</span>
+                <strong>¥120 / 小时</strong>
+              </div>
+              <div class="charge-block">
+                <span>本节扣费</span>
+                <strong>¥180</strong>
+              </div>
+              <div class="charge-block charge-block--danger">
+                <span>完成后余额</span>
+                <strong>-¥60</strong>
+              </div>
+
+              <div class="charge-warning">
+                <strong>系统判断</strong>
+                <p>当前余额不足覆盖下一节已排课程，完成本节课后将自动加入“待收费提醒”。</p>
+              </div>
+
+              <div class="result-card">
+                <div class="result-card__title">完成后系统反馈</div>
+                <ul>
+                  <li>保存课后记录</li>
+                  <li>自动生成扣费记录</li>
+                  <li>更新学生余额</li>
+                  <li>同步学生端反馈与作业</li>
+                  <li>加入工作台待收费提醒</li>
+                </ul>
+              </div>
+
+              <div class="charge-actions">
+                <button class="btn btn--ghost">暂存记录</button>
+                <button class="btn btn--primary">保存并完成课程</button>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="screen" id="student">
+          <div class="screen-heading">
+            <div class="eyebrow">Student Profile</div>
+            <h2>学生页做“全貌”，账户页先告诉老师还剩多少钱、还能上几次课。</h2>
+          </div>
+
+          <div class="student-layout">
+            <section class="student-overview">
+              <div class="student-list-strip">
+                <div class="student-list-strip__header">
+                  <strong>学生列表</strong>
+                  <button class="btn btn--primary btn--small">新增学生</button>
+                </div>
+                <div class="student-row is-active">
+                  <div>
+                    <strong>陈子轩</strong>
+                    <span>初二 · 英语</span>
+                  </div>
+                  <em class="pill pill--danger">余额不足</em>
+                </div>
+                <div class="student-row">
+                  <div>
+                    <strong>王小明</strong>
+                    <span>初三 · 数学</span>
+                  </div>
+                  <em class="pill pill--ok">正常</em>
+                </div>
+                <div class="student-row">
+                  <div>
+                    <strong>李佳怡</strong>
+                    <span>高一 · 物理</span>
+                  </div>
+                  <em class="pill pill--warn">待补记录</em>
+                </div>
+              </div>
+
+              <div class="student-header">
+                <div>
+                  <div class="student-name">陈子轩 · 初二</div>
+                  <div class="student-meta">主科英语 · 家长陈女士 · 138xxxxxx · 下一节课周五 16:30</div>
+                </div>
+                <div class="pill pill--danger">余额不足</div>
+              </div>
+
+              <div class="summary-row">
+                <article class="summary-tile">
+                  <span>当前余额</span>
+                  <strong>¥120</strong>
+                  <em>不足覆盖下一节课</em>
+                </article>
+                <article class="summary-tile">
+                  <span>主科单价</span>
+                  <strong>¥120 / 小时</strong>
+                  <em>按课程完成时单价扣减</em>
+                </article>
+                <article class="summary-tile">
+                  <span>预计还能上</span>
+                  <strong>约 1.0 节</strong>
+                  <em>按当前科目估算</em>
+                </article>
+              </div>
+
+              <div class="student-tabs">
+                <div class="student-tab is-active">课程</div>
+                <div class="student-tab">课后记录</div>
+                <div class="student-tab">作业</div>
+                <div class="student-tab is-strong">账户</div>
+                <div class="student-tab">资料</div>
+              </div>
+
+              <div class="ledger-panel">
+                <div class="ledger-panel__header">
+                  <div>
+                    <h3>账户 Tab</h3>
+                    <p>老师真正关心的是余额、流水和下一节课风险，而不是复杂财务报表。</p>
+                  </div>
+                  <button class="btn btn--primary btn--small">录入收款</button>
+                </div>
+
+                <div class="ledger-grid">
+                  <div class="ledger-card">
+                    <span>最近收款</span>
+                    <strong>¥1000</strong>
+                    <p>2026-04-10 · 微信转账</p>
+                  </div>
+                  <div class="ledger-card">
+                    <span>最近扣费</span>
+                    <strong>¥180</strong>
+                    <p>2026-04-18 英语课 · 1.5 小时</p>
+                  </div>
+                  <div class="ledger-card ledger-card--accent">
+                    <span>现在收款 ¥1000 后</span>
+                    <strong>¥1120</strong>
+                    <p>风险立刻解除</p>
+                  </div>
+                </div>
+
+                <div class="timeline">
+                  <article class="timeline-item">
+                    <div class="timeline-item__date">04 / 21</div>
+                    <div class="timeline-item__content">
+                      <strong>英语课自动扣费 ¥180</strong>
+                      <p>课程完成后生成扣费记录，余额变为 -¥60。</p>
+                    </div>
+                  </article>
+                  <article class="timeline-item">
+                    <div class="timeline-item__date">04 / 18</div>
+                    <div class="timeline-item__content">
+                      <strong>英语课自动扣费 ¥180</strong>
+                      <p>1.5 小时课时，按当前单价扣费。</p>
+                    </div>
+                  </article>
+                  <article class="timeline-item">
+                    <div class="timeline-item__date">04 / 10</div>
+                    <div class="timeline-item__content">
+                      <strong>录入收款 ¥1000</strong>
+                      <p>老师在工作台或学生账户内均可录入。</p>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </section>
+
+            <aside class="right-rail">
+              <div class="rail-card">
+                <h4>自动风险标签</h4>
+                <div class="tag-line">余额不足</div>
+                <div class="tag-line">最近作业待批改</div>
+                <div class="tag-line">本周仍有 1 节已排课程</div>
+              </div>
+
+              <div class="rail-card rail-card--soft">
+                <h4>最常用动作</h4>
+                <button class="wide-action">为该学生排课</button>
+                <button class="wide-action">录入收款</button>
+                <button class="wide-action">查看最近反馈</button>
+              </div>
+
+              <div class="rail-card">
+                <h4>新增学生弹窗</h4>
+                <div class="mock-form">
+                  <div class="mock-input">学生姓名：林书瑶</div>
+                  <div class="mock-input">年级：初一</div>
+                  <div class="mock-input">主科：英语</div>
+                  <div class="mock-input">家长电话：138xxxxxx</div>
+                </div>
+                <div class="inline-status inline-status--ok">保存后可直接进入“为该学生排第一节课”</div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="screen" id="assignments">
+          <div class="screen-heading">
+            <div class="eyebrow">Assignment Center</div>
+            <h2>作业页只做一件事：帮助老师集中处理跨学生的作业任务。</h2>
+          </div>
+
+          <div class="assignment-layout">
+            <section class="assignment-main">
+              <div class="assignment-tabs">
+                <div class="assignment-tab is-active">待批改</div>
+                <div class="assignment-tab">进行中</div>
+                <div class="assignment-tab">已完成</div>
+                <div class="assignment-tab">逾期未交</div>
+              </div>
+
+              <div class="assignment-table">
+                <div class="assignment-table__head">
+                  <div>学生</div>
+                  <div>作业标题</div>
+                  <div>来源课程</div>
+                  <div>提交时间</div>
+                  <div>状态</div>
+                </div>
+
+                <div class="assignment-table__row">
+                  <div>王小明</div>
+                  <div>数学练习册第 3 章</div>
+                  <div>4/20 晚课</div>
+                  <div>20:12</div>
+                  <div><span class="pill pill--warn">待批改</span></div>
+                </div>
+                <div class="assignment-table__row">
+                  <div>陈子轩</div>
+                  <div>英语单词默写 40 个</div>
+                  <div>4/21 英语课</div>
+                  <div>19:05</div>
+                  <div><span class="pill pill--warn">待批改</span></div>
+                </div>
+                <div class="assignment-table__row">
+                  <div>周思远</div>
+                  <div>函数综合练习</div>
+                  <div>4/19 数学课</div>
+                  <div>昨天</div>
+                  <div><span class="pill pill--danger">逾期</span></div>
+                </div>
+              </div>
+            </section>
+
+            <aside class="assignment-review">
+              <div class="rail-card">
+                <h4>批改侧边栏</h4>
+                <div class="review-block">
+                  <span>学生</span>
+                  <strong>王小明</strong>
+                </div>
+                <div class="review-block">
+                  <span>作业</span>
+                  <strong>数学练习册第 3 章</strong>
+                </div>
+                <div class="review-answer">
+                  学生提交内容预览区。这里可以放图片、文本、附件缩略展示，让老师在当前页直接批改，不用跳详情。
+                </div>
+                <div class="mock-form">
+                  <div class="mock-input">评分：92</div>
+                  <div class="mock-input mock-input--tall">评语：整体掌握不错，第 15 题函数图像判断还需要再练一遍。</div>
+                </div>
+                <button class="btn btn--primary btn--small" style="margin-top: 14px;">保存批改结果</button>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="screen" id="settings">
+          <div class="screen-heading">
+            <div class="eyebrow">Settings</div>
+            <h2>设置页只保留规则型内容，不承载日常教学操作。</h2>
+          </div>
+
+          <div class="settings-layout">
+            <section class="settings-main">
+              <div class="settings-card">
+                <div class="panel__header">
+                  <div>
+                    <h3>科目与课时单价</h3>
+                    <p>扣费逻辑以课程完成时的有效单价为准。</p>
+                  </div>
+                  <button class="btn btn--primary btn--small">新增科目</button>
+                </div>
+
+                <div class="pricing-table">
+                  <div class="pricing-table__head">
+                    <div>科目</div>
+                    <div>单价</div>
+                    <div>生效时间</div>
+                    <div>状态</div>
+                  </div>
+                  <div class="pricing-table__row">
+                    <div>数学</div>
+                    <div>¥120 / 小时</div>
+                    <div>2026-01-01</div>
+                    <div><span class="pill pill--ok">生效中</span></div>
+                  </div>
+                  <div class="pricing-table__row">
+                    <div>英语</div>
+                    <div>¥120 / 小时</div>
+                    <div>2026-01-01</div>
+                    <div><span class="pill pill--ok">生效中</span></div>
+                  </div>
+                  <div class="pricing-table__row">
+                    <div>物理</div>
+                    <div>¥150 / 小时</div>
+                    <div>2026-01-01</div>
+                    <div><span class="pill pill--ok">生效中</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="settings-card">
+                <div class="panel__header">
+                  <div>
+                    <h3>提醒规则</h3>
+                    <p>提醒只服务主流程，不做泛消息轰炸。</p>
+                  </div>
+                </div>
+
+                <div class="rule-list">
+                  <label class="rule-item">
+                    <input type="checkbox" checked />
+                    <span>当余额不足覆盖下一节课时，加入工作台待收费提醒</span>
+                  </label>
+                  <label class="rule-item">
+                    <input type="checkbox" checked />
+                    <span>当课程结束后 30 分钟仍未补记录时，继续提醒</span>
+                  </label>
+                  <label class="rule-item">
+                    <input type="checkbox" />
+                    <span>对逾期未交作业的学生进行系统提醒</span>
+                  </label>
+                </div>
+              </div>
+            </section>
+
+            <aside class="quick-panel">
+              <div class="rail-card rail-card--soft">
+                <h4>设计原则</h4>
+                <div class="tag-line">设置只放规则，不放高频操作</div>
+                <div class="tag-line">单价是扣费计算依据</div>
+                <div class="tag-line">提醒要少而准</div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

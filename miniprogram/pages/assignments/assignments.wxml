@@ -1,0 +1,130 @@
+<!-- pages/assignments/assignments.wxml -->
+<view class="page-container">
+
+  <!-- 顶部 Tab 切换 -->
+  <view class="tab-bar">
+    <view
+      class="tab-item {{activeTab === 0 ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-tab="0"
+    >
+      <text class="tab-text">待完成</text>
+      <view class="tab-badge" wx:if="{{pendingCount > 0 && activeTab !== 0}}">
+        <text class="badge-text">{{pendingCount}}</text>
+      </view>
+    </view>
+    <view
+      class="tab-item {{activeTab === 1 ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-tab="1"
+    >
+      <text class="tab-text">已完成</text>
+    </view>
+    <!-- 选中指示线 -->
+    <view class="tab-indicator {{activeTab === 1 ? 'right' : ''}}"></view>
+  </view>
+
+  <!-- 待完成列表 -->
+  <view wx:if="{{activeTab === 0}}">
+    <!-- 加载骨架 -->
+    <view wx:if="{{loading}}" class="list-content">
+      <view class="skeleton-card" wx:for="{{[1,2,3]}}" wx:key="index">
+        <view class="skeleton skeleton-title"></view>
+        <view class="skeleton skeleton-line"></view>
+        <view class="skeleton skeleton-short"></view>
+      </view>
+    </view>
+
+    <!-- 作业列表 -->
+    <view wx:elif="{{pendingList.length > 0}}" class="list-content">
+      <view
+        wx:for="{{pendingList}}"
+        wx:key="id"
+        class="assignment-card {{item.isUrgent ? 'urgent' : ''}}"
+        bindtap="goToDetail"
+        data-id="{{item.id}}"
+      >
+        <!-- 作业标题 -->
+        <view class="card-header">
+          <text class="assignment-title">{{item.title}}</text>
+          <view class="status-tag pending-tag">
+            <text class="status-text">未提交</text>
+          </view>
+        </view>
+
+        <!-- 科目和截止日期 -->
+        <view class="card-meta">
+          <view class="subject-badge">
+            <text class="subject-text">{{item.subject}}</text>
+          </view>
+          <text class="due-date {{item.isUrgent ? 'urgent-date' : ''}}">截止：{{item.dueDateStr}}</text>
+        </view>
+
+        <!-- 截止状态提示 -->
+        <view class="due-status" wx:if="{{item.dueStatus.text}}">
+          <text class="due-status-text" style="color: {{item.dueStatus.color}};">{{item.dueStatus.text}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:elif="{{!loading}}" class="empty-state">
+      <text class="empty-icon">✅</text>
+      <text class="empty-title">暂无待完成作业</text>
+      <text class="empty-desc">已完成所有作业，继续保持！</text>
+    </view>
+  </view>
+
+  <!-- 已完成列表 -->
+  <view wx:if="{{activeTab === 1}}">
+    <!-- 加载骨架 -->
+    <view wx:if="{{loading}}" class="list-content">
+      <view class="skeleton-card" wx:for="{{[1,2,3]}}" wx:key="index">
+        <view class="skeleton skeleton-title"></view>
+        <view class="skeleton skeleton-line"></view>
+        <view class="skeleton skeleton-short"></view>
+      </view>
+    </view>
+
+    <!-- 已完成列表 -->
+    <view wx:elif="{{completedList.length > 0}}" class="list-content">
+      <view
+        wx:for="{{completedList}}"
+        wx:key="id"
+        class="assignment-card completed-card"
+        bindtap="goToDetail"
+        data-id="{{item.id}}"
+      >
+        <!-- 作业标题 -->
+        <view class="card-header">
+          <text class="assignment-title">{{item.title}}</text>
+          <view class="status-tag {{item.status === 'graded' ? 'graded-tag' : 'submitted-tag'}}">
+            <text class="status-text">{{item.statusInfo.text}}</text>
+          </view>
+        </view>
+
+        <!-- 科目 -->
+        <view class="card-meta">
+          <view class="subject-badge">
+            <text class="subject-text">{{item.subject}}</text>
+          </view>
+          <text class="submit-date" wx:if="{{item.submitted_at}}">提交：{{item.submittedDateStr}}</text>
+        </view>
+
+        <!-- 已批改信息 -->
+        <view class="graded-info" wx:if="{{item.status === 'graded'}}">
+          <text class="score-text">评分：{{item.score}}分</text>
+          <text class="comment-preview" wx:if="{{item.commentPreview}}">{{item.commentPreview}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:elif="{{!loading}}" class="empty-state">
+      <text class="empty-icon">📝</text>
+      <text class="empty-title">还没有已完成的作业</text>
+      <text class="empty-desc">快去完成作业吧</text>
+    </view>
+  </view>
+
+</view>

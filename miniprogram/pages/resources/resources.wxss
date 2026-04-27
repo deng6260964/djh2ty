@@ -1,0 +1,257 @@
+/* pages/resources/resources.wxss */
+
+.page-container {
+  background: #F8FAFC;
+  min-height: 100vh;
+  padding-bottom: 160rpx;
+}
+
+/* 科目筛选栏 */
+.subject-filter-wrap {
+  background: #FFFFFF;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  margin-bottom: 16rpx;
+}
+
+.subject-filter {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.filter-inner {
+  display: flex;
+  padding: 16rpx 20rpx;
+  gap: 12rpx;
+  align-items: center;
+}
+
+.filter-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 10rpx 24rpx;
+  border-radius: 32rpx;
+  background: #F3F4F6;
+  flex-shrink: 0;
+}
+
+.filter-tag.active {
+  background: #2563EB;
+}
+
+.filter-tag-text {
+  font-size: 24rpx;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.filter-tag.active .filter-tag-text {
+  color: #FFFFFF;
+}
+
+/* 列表内容区 */
+.list-content {
+  padding: 8rpx 24rpx 0;
+}
+
+/* 数量提示 */
+.list-count {
+  padding: 8rpx 4rpx 12rpx;
+}
+
+.count-text {
+  font-size: 24rpx;
+  color: #9CA3AF;
+}
+
+/* 骨架屏 */
+.skeleton-card {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 12rpx;
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.skeleton-info {
+  flex: 1;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 50%, #E5E7EB 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8rpx;
+  display: block;
+}
+
+.sk-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 16rpx;
+  flex-shrink: 0;
+}
+
+.sk-name {
+  width: 60%;
+  height: 28rpx;
+  margin-bottom: 12rpx;
+}
+
+.sk-meta {
+  width: 40%;
+  height: 22rpx;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 资料卡片 */
+.resource-card {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 12rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+/* 文件图标 */
+.file-icon-wrap {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.file-icon-text {
+  font-size: 22rpx;
+  font-weight: 700;
+  letter-spacing: -1rpx;
+}
+
+/* 文件信息 */
+.file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #1E293B;
+  margin-bottom: 10rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-wrap: wrap;
+}
+
+.subject-mini-badge {
+  background: #EFF6FF;
+  padding: 2rpx 12rpx;
+  border-radius: 6rpx;
+}
+
+.subject-mini-text {
+  font-size: 20rpx;
+  color: #2563EB;
+  font-weight: 500;
+}
+
+.file-size {
+  font-size: 22rpx;
+  color: #9CA3AF;
+}
+
+.file-date {
+  font-size: 22rpx;
+  color: #9CA3AF;
+}
+
+/* 操作按钮 */
+.file-action {
+  flex-shrink: 0;
+}
+
+.action-loading {
+  width: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-dot {
+  font-size: 28rpx;
+  color: #2563EB;
+  letter-spacing: 2rpx;
+}
+
+.action-btn {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-arrow {
+  font-size: 40rpx;
+  color: #D1D5DB;
+  font-weight: 300;
+}
+
+/* 加载更多 */
+.load-more-wrap {
+  padding: 32rpx 0;
+  text-align: center;
+}
+
+.loading-more, .no-more {
+  color: #9CA3AF;
+  font-size: 24rpx;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 0 80rpx;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 32rpx;
+  opacity: 0.5;
+}
+
+.empty-title {
+  font-size: 30rpx;
+  color: #374151;
+  font-weight: 500;
+  margin-bottom: 12rpx;
+}
+
+.empty-desc {
+  font-size: 26rpx;
+  color: #9CA3AF;
+}

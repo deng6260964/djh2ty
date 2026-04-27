@@ -1,0 +1,109 @@
+<!-- pages/courses/courses.wxml -->
+<view class="page-container">
+
+  <!-- 日历区域 -->
+  <view class="calendar-section">
+    <!-- 月份切换 -->
+    <view class="month-nav">
+      <view class="month-arrow" bindtap="prevMonth">
+        <text class="arrow-text">‹</text>
+      </view>
+      <text class="month-title">{{monthTitle}}</text>
+      <view class="month-arrow" bindtap="nextMonth">
+        <text class="arrow-text">›</text>
+      </view>
+    </view>
+
+    <!-- 星期标题行 -->
+    <view class="week-header">
+      <text class="week-day">日</text>
+      <text class="week-day">一</text>
+      <text class="week-day">二</text>
+      <text class="week-day">三</text>
+      <text class="week-day">四</text>
+      <text class="week-day">五</text>
+      <text class="week-day">六</text>
+    </view>
+
+    <!-- 日历格子 -->
+    <view class="calendar-grid">
+      <view
+        wx:for="{{calendarDays}}"
+        wx:key="index"
+        class="calendar-cell"
+        bindtap="onDateTap"
+        data-date-str="{{item.dateStr}}"
+        data-is-empty="{{item.isEmpty}}"
+      >
+        <view
+          class="day-circle {{item.isEmpty ? 'empty' : ''}} {{item.dateStr === selectedDate ? 'selected' : ''}} {{item.isToday && item.dateStr !== selectedDate ? 'today' : ''}}"
+        >
+          <text class="day-text {{item.isEmpty ? 'empty' : ''}} {{item.dateStr === selectedDate ? 'selected' : ''}} {{item.isToday && item.dateStr !== selectedDate ? 'today' : ''}}">
+            {{item.isEmpty ? '' : item.day}}
+          </text>
+        </view>
+        <!-- 有课蓝点 -->
+        <view class="course-dot" wx:if="{{item.hasCourse && item.dateStr !== selectedDate}}"></view>
+        <view class="course-dot selected-dot" wx:if="{{item.hasCourse && item.dateStr === selectedDate}}"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 课程列表 -->
+  <view class="courses-section">
+    <view class="section-header">
+      <text class="section-date-title">{{selectedDate}} 的课程</text>
+    </view>
+
+    <!-- 加载骨架 -->
+    <view wx:if="{{loading}}">
+      <view class="skeleton-card" wx:for="{{[1,2]}}" wx:key="index">
+        <view class="skeleton-line skeleton" style="width: 40%; height: 32rpx; margin-bottom: 16rpx;"></view>
+        <view class="skeleton-line skeleton" style="width: 60%; height: 28rpx; margin-bottom: 12rpx;"></view>
+        <view class="skeleton-line skeleton" style="width: 30%; height: 24rpx;"></view>
+      </view>
+    </view>
+
+    <!-- 课程卡片列表 -->
+    <block wx:elif="{{dayCourses.length > 0}}">
+      <view
+        wx:for="{{dayCourses}}"
+        wx:key="id"
+        class="course-card"
+      >
+        <!-- 左侧彩色边线 -->
+        <view class="course-left-bar" style="background-color: {{item.statusInfo.textColor}};"></view>
+
+        <view class="course-content">
+          <!-- 时间和状态 -->
+          <view class="course-row-top">
+            <text class="course-time">{{item.startTimeStr}} - {{item.endTimeStr}}</text>
+            <view class="status-tag" style="background: {{item.statusInfo.bgColor}};">
+              <text style="color: {{item.statusInfo.textColor}}; font-size: 22rpx; font-weight: 500;">{{item.statusInfo.text}}</text>
+            </view>
+          </view>
+
+          <!-- 科目 -->
+          <text class="course-subject">{{item.subject}}</text>
+
+          <!-- 老师 和 时长 -->
+          <view class="course-row-bottom">
+            <text class="course-meta">老师辅导</text>
+            <text class="course-duration">时长：{{item.durationStr}}</text>
+          </view>
+
+          <!-- 备注（如有） -->
+          <text class="course-notes" wx:if="{{item.notes}}">{{item.notes}}</text>
+        </view>
+      </view>
+    </block>
+
+    <!-- 空状态 -->
+    <view wx:elif="{{!loading}}" class="empty-state">
+      <text class="empty-icon">📅</text>
+      <text class="empty-title">今天没有课程</text>
+      <text class="empty-desc">好好休息一下吧</text>
+    </view>
+  </view>
+
+</view>

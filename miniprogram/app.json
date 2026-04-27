@@ -1,0 +1,60 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/courses/courses",
+    "pages/assignments/assignments",
+    "pages/assignment-detail/assignment-detail",
+    "pages/feedback/feedback",
+    "pages/feedback-detail/feedback-detail",
+    "pages/progress/progress",
+    "pages/resources/resources"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "navigationBarTitleText": "家教辅助系统",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F8FAFC",
+    "enablePullDownRefresh": false
+  },
+  "tabBar": {
+    "color": "#9CA3AF",
+    "selectedColor": "#2563EB",
+    "borderStyle": "white",
+    "backgroundColor": "#FFFFFF",
+    "list": [
+      {
+        "pagePath": "pages/courses/courses",
+        "text": "课程",
+        "iconPath": "assets/tabbar/courses.png",
+        "selectedIconPath": "assets/tabbar/courses-selected.png"
+      },
+      {
+        "pagePath": "pages/assignments/assignments",
+        "text": "作业",
+        "iconPath": "assets/tabbar/assignments.png",
+        "selectedIconPath": "assets/tabbar/assignments-selected.png"
+      },
+      {
+        "pagePath": "pages/feedback/feedback",
+        "text": "反馈",
+        "iconPath": "assets/tabbar/feedback.png",
+        "selectedIconPath": "assets/tabbar/feedback-selected.png"
+      },
+      {
+        "pagePath": "pages/progress/progress",
+        "text": "进度",
+        "iconPath": "assets/tabbar/progress.png",
+        "selectedIconPath": "assets/tabbar/progress-selected.png"
+      },
+      {
+        "pagePath": "pages/resources/resources",
+        "text": "资料",
+        "iconPath": "assets/tabbar/resources.png",
+        "selectedIconPath": "assets/tabbar/resources-selected.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

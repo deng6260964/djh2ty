@@ -1,0 +1,179 @@
+/* pages/feedback/feedback.wxss */
+
+.page-container {
+  background: #F8FAFC;
+  min-height: 100vh;
+  padding-bottom: 160rpx;
+}
+
+.list-content {
+  padding: 16rpx 24rpx 0;
+}
+
+/* 骨架屏 */
+.skeleton-card {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 16rpx;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 50%, #E5E7EB 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8rpx;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.sk-date {
+  width: 30%;
+  height: 24rpx;
+}
+
+.sk-label {
+  width: 20%;
+  height: 22rpx;
+  margin-bottom: 12rpx;
+}
+
+.sk-text {
+  width: 100%;
+  height: 28rpx;
+}
+
+.sk-text.short {
+  width: 70%;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 反馈卡片 */
+.feedback-card {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+/* 卡片顶部 */
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #F3F4F6;
+}
+
+.course-info {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex: 1;
+}
+
+.subject-badge {
+  background: #EFF6FF;
+  padding: 6rpx 20rpx;
+  border-radius: 8rpx;
+}
+
+.subject-text {
+  font-size: 24rpx;
+  color: #2563EB;
+  font-weight: 500;
+}
+
+.course-date {
+  font-size: 26rpx;
+  color: #374151;
+  font-weight: 500;
+}
+
+.course-time {
+  font-size: 24rpx;
+  color: #9CA3AF;
+}
+
+.view-all-arrow {
+  font-size: 36rpx;
+  color: #D1D5DB;
+  font-weight: 300;
+}
+
+/* 反馈摘要 */
+.feedback-preview {
+  padding-top: 4rpx;
+}
+
+.preview-label {
+  display: block;
+  font-size: 22rpx;
+  color: #9CA3AF;
+  font-weight: 500;
+  margin-bottom: 8rpx;
+  letter-spacing: 1rpx;
+}
+
+.preview-text {
+  font-size: 26rpx;
+  color: #374151;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 无摘要占位 */
+.feedback-placeholder {
+  padding: 8rpx 0;
+}
+
+.placeholder-text {
+  font-size: 24rpx;
+  color: #9CA3AF;
+}
+
+/* 加载更多 */
+.load-more-wrap {
+  padding: 32rpx 0;
+  text-align: center;
+}
+
+.loading-more, .no-more {
+  color: #9CA3AF;
+  font-size: 24rpx;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 0 80rpx;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 32rpx;
+  opacity: 0.5;
+}
+
+.empty-title {
+  font-size: 30rpx;
+  color: #374151;
+  font-weight: 500;
+  margin-bottom: 12rpx;
+}
+
+.empty-desc {
+  font-size: 26rpx;
+  color: #9CA3AF;
+}

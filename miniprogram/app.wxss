@@ -1,0 +1,211 @@
+/* app.wxss - 全局样式 */
+
+/* CSS 变量 */
+page {
+  --color-primary: #2563EB;
+  --color-primary-dark: #1A56DB;
+  --color-primary-light: #3B82F6;
+  --color-primary-pale: #EFF6FF;
+  --color-success: #10B981;
+  --color-success-bg: #ECFDF5;
+  --color-warning: #F59E0B;
+  --color-warning-bg: #FFFBEB;
+  --color-error: #EF4444;
+  --color-error-bg: #FEF2F2;
+  --color-info: #3B82F6;
+  --color-text-title: #111827;
+  --color-text-body: #374151;
+  --color-text-secondary: #6B7280;
+  --color-text-muted: #9CA3AF;
+  --color-divider: #E5E7EB;
+  --color-bg-light: #F9FAFB;
+  --color-bg-page: #F8FAFC;
+  --color-white: #FFFFFF;
+
+  background-color: #F8FAFC;
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+  color: #374151;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+
+/* 通用卡片样式 */
+.card {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  margin: 16rpx 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+/* 列表分割线 */
+.divider {
+  height: 1rpx;
+  background: #E5E7EB;
+  margin: 0 32rpx;
+}
+
+/* 标签/Badge 基础样式 */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx 16rpx;
+  border-radius: 8rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+}
+
+.tag-blue {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.tag-green {
+  background: #ECFDF5;
+  color: #10B981;
+}
+
+.tag-gray {
+  background: #F3F4F6;
+  color: #9CA3AF;
+}
+
+.tag-orange {
+  background: #FFFBEB;
+  color: #F59E0B;
+}
+
+.tag-red {
+  background: #FEF2F2;
+  color: #EF4444;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 48rpx;
+}
+
+.empty-icon {
+  font-size: 128rpx;
+  margin-bottom: 32rpx;
+  opacity: 0.4;
+}
+
+.empty-title {
+  font-size: 30rpx;
+  color: #374151;
+  font-weight: 500;
+  margin-bottom: 16rpx;
+  text-align: center;
+}
+
+.empty-desc {
+  font-size: 26rpx;
+  color: #9CA3AF;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* 页面容器 */
+.page-container {
+  min-height: 100vh;
+  background: #F8FAFC;
+  padding-bottom: 120rpx;
+}
+
+/* 分段标题 */
+.section-title {
+  font-size: 26rpx;
+  color: #9CA3AF;
+  font-weight: 600;
+  padding: 24rpx 32rpx 12rpx;
+  letter-spacing: 2rpx;
+  text-transform: uppercase;
+}
+
+/* 底部加载提示 */
+.load-more {
+  text-align: center;
+  padding: 32rpx;
+  color: #9CA3AF;
+  font-size: 24rpx;
+}
+
+/* 骨架屏 */
+.skeleton {
+  background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 50%, #E5E7EB 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8rpx;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 按钮通用 */
+.btn-primary {
+  background: #2563EB;
+  color: #FFFFFF;
+  border-radius: 12rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  border: none;
+}
+
+.btn-primary::after {
+  border: none;
+}
+
+.btn-default {
+  background: #FFFFFF;
+  color: #374151;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  text-align: center;
+  border: 1rpx solid #D1D5DB;
+}
+
+/* 科目颜色标签 */
+.subject-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx 16rpx;
+  border-radius: 8rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+/* flex 辅助 */
+.flex {
+  display: flex;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}

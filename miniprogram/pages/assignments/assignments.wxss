@@ -1,0 +1,279 @@
+/* pages/assignments/assignments.wxss */
+
+.page-container {
+  background: #F8FAFC;
+  min-height: 100vh;
+  padding-bottom: 160rpx;
+}
+
+/* Tab 栏 */
+.tab-bar {
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  padding: 0 32rpx;
+  position: relative;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28rpx 0;
+  position: relative;
+}
+
+.tab-text {
+  font-size: 28rpx;
+  color: #9CA3AF;
+  font-weight: 500;
+}
+
+.tab-item.active .tab-text {
+  color: #2563EB;
+  font-weight: 600;
+}
+
+/* 角标 */
+.tab-badge {
+  width: 32rpx;
+  height: 32rpx;
+  background: #EF4444;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8rpx;
+}
+
+.badge-text {
+  font-size: 18rpx;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+/* 指示线 */
+.tab-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50%;
+  height: 4rpx;
+  background: #2563EB;
+  border-radius: 4rpx 4rpx 0 0;
+  transition: left 0.25s ease;
+}
+
+.tab-indicator.right {
+  left: 50%;
+}
+
+/* 列表内容区 */
+.list-content {
+  padding: 16rpx 24rpx 0;
+}
+
+/* 骨架卡片 */
+.skeleton-card {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 16rpx;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 50%, #E5E7EB 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8rpx;
+  display: block;
+}
+
+.skeleton-title {
+  width: 60%;
+  height: 32rpx;
+  margin-bottom: 20rpx;
+}
+
+.skeleton-line {
+  width: 80%;
+  height: 24rpx;
+  margin-bottom: 16rpx;
+}
+
+.skeleton-short {
+  width: 40%;
+  height: 24rpx;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 作业卡片 */
+.assignment-card {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 28rpx 28rpx 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+  border-left: 6rpx solid transparent;
+}
+
+.assignment-card.urgent {
+  border-left-color: #EF4444;
+}
+
+.assignment-card.completed-card {
+  border-left: 6rpx solid #10B981;
+  opacity: 0.9;
+}
+
+/* 卡片标题行 */
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.assignment-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1E293B;
+  flex: 1;
+  margin-right: 16rpx;
+  line-height: 1.4;
+}
+
+/* 状态标签 */
+.status-tag {
+  padding: 4rpx 16rpx;
+  border-radius: 8rpx;
+  flex-shrink: 0;
+}
+
+.status-text {
+  font-size: 22rpx;
+  font-weight: 500;
+}
+
+.pending-tag {
+  background: #FFFBEB;
+}
+
+.pending-tag .status-text {
+  color: #F59E0B;
+}
+
+.submitted-tag {
+  background: #ECFDF5;
+}
+
+.submitted-tag .status-text {
+  color: #10B981;
+}
+
+.graded-tag {
+  background: #EFF6FF;
+}
+
+.graded-tag .status-text {
+  color: #2563EB;
+}
+
+/* 科目和截止日期 */
+.card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.subject-badge {
+  background: #EFF6FF;
+  padding: 4rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+.subject-text {
+  font-size: 22rpx;
+  color: #2563EB;
+  font-weight: 500;
+}
+
+.due-date {
+  font-size: 24rpx;
+  color: #6B7280;
+}
+
+.due-date.urgent-date {
+  color: #EF4444;
+  font-weight: 500;
+}
+
+.submit-date {
+  font-size: 24rpx;
+  color: #6B7280;
+}
+
+/* 截止状态提示 */
+.due-status {
+  margin-top: 4rpx;
+}
+
+.due-status-text {
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+/* 已批改信息 */
+.graded-info {
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #F3F4F6;
+}
+
+.score-text {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #2563EB;
+  margin-bottom: 8rpx;
+}
+
+.comment-preview {
+  display: block;
+  font-size: 24rpx;
+  color: #6B7280;
+  line-height: 1.5;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 0 80rpx;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 32rpx;
+  opacity: 0.5;
+}
+
+.empty-title {
+  font-size: 30rpx;
+  color: #374151;
+  font-weight: 500;
+  margin-bottom: 12rpx;
+}
+
+.empty-desc {
+  font-size: 26rpx;
+  color: #9CA3AF;
+}

@@ -1,0 +1,45 @@
+<!-- pages/login/login.wxml -->
+<view class="login-page">
+  <!-- 顶部装饰区域 -->
+  <view class="login-header">
+    <view class="logo-wrap">
+      <view class="logo-circle">
+        <text class="logo-icon">📚</text>
+      </view>
+    </view>
+    <text class="app-title">家教辅助系统</text>
+    <text class="app-subtitle">学生和家长专属</text>
+  </view>
+
+  <!-- 登录卡片 -->
+  <view class="login-card">
+    <view class="card-header">
+      <text class="card-title">微信授权登录</text>
+      <text class="card-desc">授权后即可查看你的学习信息</text>
+    </view>
+
+    <!-- 错误提示 -->
+    <view class="error-box" wx:if="{{errorMsg}}">
+      <text class="error-icon">⚠️</text>
+      <text class="error-text">{{errorMsg}}</text>
+    </view>
+
+    <!-- 登录按钮 -->
+    <button
+      class="login-btn {{loading ? 'loading' : ''}}"
+      bindtap="handleLogin"
+      disabled="{{loading}}"
+    >
+      <text wx:if="{{!loading}}" class="btn-text">微信一键登录</text>
+      <text wx:if="{{loading}}" class="btn-text">登录中...</text>
+    </button>
+
+    <!-- 提示说明 -->
+    <text class="hint-text">请用老师添加的微信号登录</text>
+  </view>
+
+  <!-- 底部说明 -->
+  <view class="login-footer">
+    <text class="footer-text">家教辅助系统 · 安全可靠</text>
+  </view>
+</view>
