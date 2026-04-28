@@ -2,7 +2,7 @@
 
 > 状态：当前
 > 范围：全项目
-> 更新：2026-04-26
+> 更新：2026-04-28
 
 ## 当前基线
 
@@ -13,6 +13,7 @@
 - `docs/01-product/teacher-v2/prd.md` — 当前老师端 PRD
 - `docs/02-design/teacher-v2/prototype.md` — 当前老师端原型说明
 - `docs/04-implementation/teacher-v2/plan.md` — 实施进度和剩余工作
+- `docs/08-progress/project-status.md` — 当前进行态和多人并行工作流
 
 旧文档如 `docs/99-archive/legacy/product/prd-v1.md`、`docs/99-archive/legacy/design/web-wireframes-v1.md` 仅用于历史对照。
 
@@ -111,6 +112,11 @@ PR 描述应包含：
 
 - `docs/01-product/teacher-v2/status.md`
 - `docs/04-implementation/teacher-v2/plan.md`
+
+多人并行需求、重构、测试刷新或文档治理进入进行态时，应同步维护：
+
+- `docs/08-progress/project-status.md`
+- `docs/08-progress/workstreams/`
 
 旧文档优先标记为历史文档，不要轻易删除，除非它们明显是无用文件或已被生成物替代。
 

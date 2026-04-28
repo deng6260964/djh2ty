@@ -2,8 +2,14 @@
 
 > 状态：参考
 > 范围：后端
-> 更新：2026-04-27
+> 更新：2026-04-28
 > 说明：后端测试覆盖快照；当前测试结果以最新本地 `pytest` 运行为准。
+
+## 最近一次执行结果
+
+| 时间 | 命令 | 结果 | 备注 |
+| --- | --- | --- | --- |
+| 2026-04-28 10:03 CST | `cd backend && pytest -q` | 120 passed in 42.50s | 出现 `pytest-asyncio` fixture loop scope deprecation warning，不影响本次结果 |
 
 ## 测试环境说明
 

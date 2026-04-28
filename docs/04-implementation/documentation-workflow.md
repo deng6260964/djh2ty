@@ -2,7 +2,7 @@
 
 > 状态：当前
 > 范围：全项目
-> 更新：2026-04-27
+> 更新：2026-04-28
 
 本文定义当前 `docs/` 新结构下，文档如何组织、更新、验证和交接。目标是在 vibecoding、多 agent 协作和多人研发过程中，让模型与研发都能快速找到当前事实、历史背景、测试依据和变更记录。
 
@@ -20,7 +20,7 @@
 - `docs/02-design/teacher-v2/prototype.md` — 当前老师端原型说明
 - `docs/04-implementation/teacher-v2/plan.md` — 实施进度和剩余工作
 
-完整项目自有 Markdown 文档清单见 `docs/04-implementation/doc-map.md`。测试资产见 `docs/05-testing/README.md`。重要完成态变更见 `docs/07-changes/README.md`。
+完整项目自有 Markdown 文档清单见 `docs/04-implementation/doc-map.md`。测试资产见 `docs/05-testing/README.md`。当前进行态见 `docs/08-progress/project-status.md`。重要完成态变更见 `docs/07-changes/README.md`。
 
 归档文档如 `docs/99-archive/legacy/product/prd-v1.md`、`docs/99-archive/legacy/design/web-wireframes-v1.md` 只作为历史对照材料，不作为当前决策依据。
 
@@ -58,10 +58,11 @@ AI 对话、`.specstory/` 历史、截图、临时调查笔记和生成过程材
 6. `docs/01-product/teacher-v2/prd.md`
 7. `docs/02-design/teacher-v2/prototype.md`
 8. `docs/04-implementation/teacher-v2/plan.md`
-9. 涉及测试时阅读 `docs/05-testing/README.md` 和相关用例 / 验证记录
-10. 涉及历史变更时阅读 `docs/07-changes/`
-11. 涉及技术或部署时阅读 `docs/03-architecture/`
-12. 仅在明确做历史对照时阅读 `docs/99-archive/`
+9. 涉及多人并行、当前负责人或阻塞状态时阅读 `docs/08-progress/project-status.md`
+10. 涉及测试时阅读 `docs/05-testing/README.md` 和相关用例 / 验证记录
+11. 涉及历史变更时阅读 `docs/07-changes/`
+12. 涉及技术或部署时阅读 `docs/03-architecture/`
+13. 仅在明确做历史对照时阅读 `docs/99-archive/`
 
 老师端 V2 工作中，`docs/01-product/teacher-v2/status.md` 是最快的项目状态入口。
 
@@ -79,6 +80,7 @@ AI 对话、`.specstory/` 历史、截图、临时调查笔记和生成过程材
 | `docs/05-testing/` | 测试用例、测试报告、验证记录 | 测试资产统一入口，包含后端 pytest 报告和管理端 browser-use 用例 |
 | `docs/06-ai-worklogs/` | AI 工作日志 | 仅存放提炼后的会话结论，不放原始长对话 |
 | `docs/07-changes/` | 变更记录 | 记录已确认或已完成的重要变更 |
+| `docs/08-progress/` | 进度同步 | 记录当前进行态、负责人、阻塞点和多人并行工作流 |
 | `docs/99-archive/` | 已归档材料 | 仅保留记录，不作为当前决策依据 |
 | `.specstory/` | 原始 AI 会话历史 | 不作为当前产品事实 |
 
@@ -92,7 +94,8 @@ AI 对话、`.specstory/` 历史、截图、临时调查笔记和生成过程材
 2. 判断影响面：`backend`、`admin-web`、`student-web`、`miniprogram`、纯文档，或多个端。
 3. 确认需求是否符合老师端 V2 方向。
 4. 检查是否已有相关 `docs/07-changes/` 记录，避免重复推翻既有决策。
-5. 如果产品行为不清楚，先澄清目标行为，再改代码。
+5. 检查是否已有相关 `docs/08-progress/` 工作流，避免多人并行时重复推进或覆盖上下文。
+6. 如果产品行为不清楚，先澄清目标行为，再改代码。
 
 ### 4.2 编码中
 
@@ -115,6 +118,7 @@ AI 对话、`.specstory/` 历史、截图、临时调查笔记和生成过程材
 | --- | --- |
 | 产品状态或优先级变化 | 更新 `docs/01-product/teacher-v2/status.md` |
 | 老师端实现进度变化 | 更新 `docs/04-implementation/teacher-v2/plan.md` |
+| 负责人、阻塞、当前进行态变化 | 更新 `docs/08-progress/project-status.md` 和相关工作流文档 |
 | 产品行为或验收标准变化 | 更新当前 PRD 或相关流程文档 |
 | UI / 交互行为变化 | 更新 `docs/02-design/` 下相关文档 |
 | API、数据结构、部署或技术约定变化 | 更新 `docs/03-architecture/` 下相关文档 |
@@ -182,7 +186,7 @@ AI 对话、`.specstory/` 历史、截图、临时调查笔记和生成过程材
 - 后端启动、开发或调试方式发生变化
 - 文档结构发生变化
 
-如果多人并行需求增多，建议新增 `docs/04-implementation/workstreams/` 存放并行任务流。
+实施计划只维护方案、阶段和任务拆解，不承载日常负责人同步。多人并行进行态放入 `docs/08-progress/`。
 
 ### 5.5 测试文档
 
@@ -223,7 +227,29 @@ AI 对话、`.specstory/` 历史、截图、临时调查笔记和生成过程材
 - 已确认或已完成的重要变更
 - 需要解释“为什么变、变了什么、影响哪里、如何验证”
 
-### 5.8 归档文档
+### 5.8 进度同步文档
+
+更新位置：
+
+- `docs/08-progress/README.md`
+- `docs/08-progress/project-status.md`
+- `docs/08-progress/workstreams/*.md`
+
+适用情况：
+
+- 多人或多个 agent 并行推进需求、重构、测试或文档治理
+- 负责人、工作流状态、阻塞点、下一步发生变化
+- 一个任务暂时不适合写入完成态变更记录，但需要让接手者知道当前进展
+
+边界：
+
+- `docs/04-implementation/` 管理“怎么实现”
+- `docs/08-progress/` 管理“当前做到哪里”
+- `docs/07-changes/` 管理“已经完成或确认了什么”
+
+同一事项从计划进入进行态时，应进入进度文档；从进行态变成完成事实时，应沉淀到变更记录和对应事实源。
+
+### 5.9 归档文档
 
 更新位置：
 
@@ -300,23 +326,19 @@ docs/07-changes/template/change-record-template.md
 
 ## 8. 命名规则
 
-长期文档使用清晰的 kebab-case 文件名：
-
-- `teacher-v2-billing-recharge.md`
-- `student-web-v2-navigation.md`
-- `course-copy-week-flow.md`
+长期文档使用清晰的 kebab-case 文件名，例如 teacher-v2-billing-recharge、student-web-v2-navigation、course-copy-week-flow。
 
 避免模糊命名：
 
-- `notes.md`
-- `new-plan.md`
-- `final.md`
-- `todo2.md`
+- notes
+- new-plan
+- final
+- todo2
 
 只有日志或快照类文档使用日期前缀：
 
-- `2026-04-26-doc-architecture.md`
-- `2026-04-26-teacher-v2-handoff.md`
+- 2026-04-26-doc-architecture
+- 2026-04-26-teacher-v2-handoff
 
 ## 9. 交接清单
 
@@ -328,6 +350,7 @@ docs/07-changes/template/change-record-template.md
 - API、数据结构、部署或测试约定是否发生变化？
 - 测试用例或验证记录是否需要更新？
 - 是否需要新增一条 `docs/07-changes/` 变更记录？
+- 是否需要更新 `docs/08-progress/` 中的负责人、阻塞或下一步？
 - 是否有 AI 会话结论需要沉淀到 `docs/06-ai-worklogs/`？
 - 后续研发是否能不看原始 AI 对话也理解当前状态？
 
@@ -347,6 +370,7 @@ docs/
   05-testing/
   06-ai-worklogs/
   07-changes/
+  08-progress/
   99-archive/
 ```
 

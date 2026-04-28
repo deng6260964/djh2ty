@@ -2,7 +2,7 @@
 
 > 状态：当前
 > 范围：全项目
-> 更新：2026-04-26
+> 更新：2026-04-28
 
 本文列出项目自有 Markdown 文档，并说明每份文档的状态、范围和用途。第三方依赖目录 `node_modules/`、构建产物、缓存目录中的文档不纳入本地图。
 
@@ -17,6 +17,7 @@
 5. `docs/01-product/teacher-v2/prd.md`
 6. `docs/02-design/teacher-v2/prototype.md`
 7. `docs/04-implementation/teacher-v2/plan.md`
+8. `docs/08-progress/project-status.md`
 
 然后根据任务类型继续阅读相关架构、设计、后端或测试文档。
 
@@ -28,6 +29,8 @@
 | `docs/04-implementation/documentation-workflow.md` | 当前 | 全项目 | 文档归集、检索顺序和 vibecoding 交接流程 |
 | `docs/04-implementation/doc-map.md` | 当前 | 全项目 | 项目自有 Markdown 文档完整地图 |
 | `docs/07-changes/README.md` | 当前 | 全项目 | 变更记录目录说明 |
+| `docs/08-progress/README.md` | 当前 | 全项目 | 进度同步目录说明 |
+| `docs/08-progress/project-status.md` | 当前 | 全项目 | 当前进行态、并行工作流和下一步总览 |
 | `README.md` | 当前 | 全项目 | 仓库说明和文档入口提示 |
 | `AGENTS.md` | 当前 | 全项目 | Agent 使用的仓库工作规则 |
 | `CLAUDE.md` | 当前 | 全项目 | Claude Code 使用的仓库工作规则 |
@@ -65,12 +68,21 @@
 | `docs/04-implementation/backend/README.md` | 参考 | 后端 | 后端启动和开发参考 |
 | `docs/04-implementation/documentation-retrospective-2026-04-27.md` | 当前 | 全项目 | 当前文档结构复盘 |
 | `docs/05-testing/README.md` | 当前 | 全项目 | 测试文档统一入口 |
+| `docs/05-testing/testing-workflow.md` | 当前 | 全项目 | 测试流程指南，覆盖用例编写、执行动作、失败处理和文档归集 |
 | `docs/05-testing/backend/test-report.md` | 参考 | 后端 | 后端测试覆盖快照 |
 | `docs/05-testing/browser-use/README.md` | 当前 | 管理端 | browser-use 集成测试目录入口 |
 | `docs/05-testing/browser-use/dashboard-workbench.spec.md` | 当前 | 管理端 | 老师工作台专项集成测试用例 |
 | `docs/05-testing/browser-use/full-regression.spec.md` | 当前 | 管理端 | 老师端 V2 全量回归测试用例 |
 | `docs/05-testing/browser-use/dashboard-workbench.verification.md` | 参考 | 管理端 | 工作台验证记录快照 |
 | `docs/05-testing/browser-use/full-regression.verification.md` | 参考 | 管理端 | 全量回归验证记录快照 |
+
+## 进度同步
+
+| 文档 | 状态 | 范围 | 用途 |
+| --- | --- | --- | --- |
+| `docs/08-progress/workstreams/README.md` | 当前 | 全项目 | 并行工作流进度索引 |
+| `docs/08-progress/workstreams/student-web-v2-rework.md` | 当前 | 学生端 | 学生端新版承接进行态记录 |
+| `docs/08-progress/workstreams/admin-web-regression-refresh.md` | 当前 | 管理端 | 管理端 browser-use 回归刷新进行态记录 |
 
 ## 变更记录
 
@@ -82,6 +94,8 @@
 | `docs/07-changes/2026-04/2026-04-27-teacher-v2-auto-charge.md` | 当前 | 老师端 V2 | 完成课程自动扣费与取消回滚变更记录 |
 | `docs/07-changes/2026-04/2026-04-27-teacher-v2-main-closure.md` | 当前 | 老师端 V2 | 课程详情、待补课池、学生详情复盘和拆包收口记录 |
 | `docs/07-changes/2026-04/2026-04-27-doc-structure-retrospective.md` | 当前 | 全项目 | 文档结构复盘整理记录 |
+| `docs/07-changes/2026-04/2026-04-28-testing-workflow.md` | 当前 | 测试、文档 | 测试流程文档和测试目录归集记录 |
+| `docs/07-changes/2026-04/2026-04-28-progress-docs-folder.md` | 当前 | 文档、全项目 | 新增进度同步目录和并行工作流记录 |
 
 ## 原始 AI 历史
 

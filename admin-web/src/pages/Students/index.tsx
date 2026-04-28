@@ -45,6 +45,7 @@ const StudentsPage: React.FC = () => {
         search: searchText || undefined,
         subject: filterSubject,
         grade: filterGrade,
+        is_active: true,
       })
       setStudents(result.items)
       setTotal(result.total)

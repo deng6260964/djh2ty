@@ -2,7 +2,7 @@
 
 > 状态：当前
 > 范围：全项目
-> 更新：2026-04-27
+> 更新：2026-04-28
 
 面向单个老师或小型家教工作室的教学工作台。当前活跃基线是老师端 V2，重点围绕“课程主线”打通排课、课后记录、作业、预收余额扣费和收费提醒。
 
@@ -147,6 +147,7 @@ npm run build
 - `docs/01-product/teacher-v2/prd.md`
 - `docs/02-design/teacher-v2/prototype.md`
 - `docs/04-implementation/teacher-v2/plan.md`
+- `docs/08-progress/project-status.md`
 
 旧版 PRD、流程和线框已归档到 `docs/99-archive/`，只用于历史对照。
 

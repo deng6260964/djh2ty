@@ -2,7 +2,7 @@
 
 > 状态：当前
 > 范围：全项目
-> 更新：2026-04-26
+> 更新：2026-04-28
 
 本文为 Claude Code（claude.ai/code）在本仓库中工作时提供项目说明和约束。
 
@@ -10,7 +10,7 @@
 
 家教辅助系统：单老师模式的教学管理工具，包含 Web 管理端（老师用）、学生 Web 端（学生/家长用）和微信小程序（学生/家长用）。
 
-## 当前项目状态（2026-04-23）
+## 当前项目状态（2026-04-28）
 
 当前活跃基线已经切换到“老师端 V2 重构”，不是旧版并列模块式后台。
 
@@ -18,6 +18,7 @@
 - `docs/00-index.md`
 - `docs/04-implementation/documentation-workflow.md`
 - `docs/04-implementation/doc-map.md`
+- `docs/08-progress/project-status.md`
 
 优先参考这些文档：
 - `docs/01-product/current.md` — 当前产品基线入口
@@ -25,10 +26,11 @@
 - `docs/01-product/teacher-v2/prd.md` — 当前产品基线
 - `docs/02-design/teacher-v2/prototype.md` — 当前老师端原型基线
 - `docs/04-implementation/teacher-v2/plan.md` — 当前实现拆解和阶段状态
+- `docs/08-progress/project-status.md` — 当前进行态和多人并行工作流
 
 旧文档 `docs/99-archive/legacy/product/prd-v1.md`、`docs/99-archive/legacy/design/web-wireframes-v1.md` 仅用于历史对照，不应作为新改动的默认依据。
 
-老师端 V2 已落地的关键能力：
+老师端 V2 已进入“老师端主链路基本收口”的阶段。已落地的关键能力：
 - 工作台：`/dashboard`
 - 课程 7 天周视图：`/courses`
 - 复制上一周课程：预览 + 确认
@@ -37,14 +39,17 @@
 - 收费与账户页重构
 - 预收充值：`POST /api/billing/recharge`
 - 设置页
-- 作业中心、反馈复盘、学习复盘的一轮收口
+- 作业中心、反馈复盘、学习复盘的一轮页面收口
+- 课程详情中填写课后记录、可选布置作业并完成课程
+- 完成课程自动扣费
+- 取消 / 删除已完成课程后的自动扣费回滚
+- 请假 / 待补课池 / 安排补课
+- 学生详情账户、课后反馈、学习复盘 Tab
 
 仍在收尾中的方向：
-- 课程详情中的“课后记录 -> 反馈 -> 作业”少跳转闭环
-- 请假 / 待补课池
-- 取消课后的余额回滚
 - 学生端按 V2 方案继续重构
-- `antd` 大 chunk 进一步优化
+- 管理端 browser-use 全量回归记录按最新实现重新执行并刷新
+- 老师端后续性能优化在完成回归后再评估
 
 ## 开发命令
 
@@ -125,6 +130,7 @@ djy2ty/
     ├── 05-testing/
     ├── 06-ai-worklogs/
     ├── 07-changes/
+    ├── 08-progress/
     └── 99-archive/
 ```
 

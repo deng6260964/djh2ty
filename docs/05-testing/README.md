@@ -17,6 +17,7 @@
 
 | 文档 | 状态 | 说明 |
 | --- | --- | --- |
+| `testing-workflow.md` | 当前 | 测试流程指南，覆盖用例编写、执行动作、失败处理和文档归集 |
 | `backend/test-report.md` | 参考 | 后端自动化测试覆盖快照，真实结果以最新本地 `pytest` 为准 |
 | `browser-use/README.md` | 当前 | browser-use 用例目录说明 |
 | `browser-use/dashboard-workbench.spec.md` | 当前 | 老师工作台专项集成测试用例 |
@@ -26,7 +27,8 @@
 
 ## 使用建议
 
-1. 后端改动优先运行 `cd backend && pytest -q`，并在必要时更新 `backend/test-report.md`。
-2. 管理端流程改动优先对照 `browser-use/full-regression.spec.md` 执行相关用例。
-3. 每次手动或 browser-use 回归后，更新对应 `*.verification.md`，记录环境、数据、结果和未执行项。
-4. 新增测试文档时，同步更新 `docs/04-implementation/doc-map.md`。
+1. 先阅读 `testing-workflow.md`，按影响面决定 pytest、build、browser-use 或人工专项验收。
+2. 后端改动优先运行 `cd backend && pytest -q`，并在必要时更新 `backend/test-report.md`。
+3. 管理端流程改动优先对照 `browser-use/full-regression.spec.md` 执行相关用例。
+4. 每次手动或 browser-use 回归后，更新对应 `*.verification.md`，记录环境、数据、结果和未执行项。
+5. 新增测试文档时，同步更新 `docs/04-implementation/doc-map.md`。

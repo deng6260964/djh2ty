@@ -2,10 +2,10 @@
 
 > 状态：参考
 > 范围：管理端
-> 更新：2026-04-26
-> 验证时间：2026-04-26
+> 更新：2026-04-28
+> 验证时间：2026-04-28 10:03-10:08 CST
 > 验证目标：`docs/05-testing/browser-use/full-regression.spec.md`
-> 验证方式：Codex in-app browser + `browser-use`，辅以后端 API 创建测试数据。
+> 验证方式：Codex in-app browser + `browser-use`，非破坏性页面功能回归；辅以后端 pytest、前端 build。
 
 ## 环境
 
@@ -16,7 +16,9 @@
 
 ## 测试数据
 
-本次为执行数据依赖用例，创建了以下测试数据：
+2026-04-28 本轮未新增学生、课程、充值或上传文件，仅复用本地已有 `BU测试` 数据做页面展示验证，并执行表单空提交校验。
+
+历史验证曾创建以下测试数据，当前本地环境仍可见：
 
 - 学生：`BU测试学生-213455`
 - 年级：`初二`
@@ -42,10 +44,50 @@
 | 反馈复盘 | 通过 |
 | 资料管理 | 通过 |
 | 设置 | 通过 |
-| 学习复盘 | 失败 |
-| P0 主业务链 | 通过 |
+| 学习复盘 | 通过 |
+| P0 主业务链 | 部分通过，本轮覆盖登录、工作台、导航、页面结构、必填校验；数据创建/扣费闭环由后端 pytest 覆盖 |
 | 删除类用例 | 未执行，需确认 |
 | 真实文件上传/下载/分享 | 未执行，需准备测试文件与确认上传 |
+
+## 2026-04-28 本轮执行结果
+
+### 自动化与构建
+
+- 后端全量测试：`cd backend && pytest -q`，结果 `120 passed in 42.50s`。
+- 管理端构建：`cd admin-web && npm run build`，通过；仍有 Vite CJS Node API deprecation warning。
+- 学生端构建：`cd student-web && npm run build`，通过；仍有单 chunk 超过 500 kB 的 Vite 体积警告。
+
+### browser-use 非破坏性回归
+
+- `BU-AUTH-001` 未登录访问 `/dashboard` 自动跳转 `/login`：通过。
+- `BU-AUTH-002` 管理员登录进入 `/dashboard`：通过。
+- `BU-DASH-001` 工作台 V2 信息结构：通过。
+- `BU-DASH-002` 空数据状态：通过。
+- `BU-DASH-003` 快速排课弹窗：通过；实际取消按钮 DOM 文案为 `取 消`，不是连续的 `取消`。
+- `BU-DASH-004` 快速操作跳转：通过，`快速调课` -> `/courses`，`新增学生` -> `/students`，`录入收款` -> `/billing`。
+- 核心页面结构：通过，覆盖 `/students`、`/courses`、`/billing`、`/assignments`、`/feedback`、`/progress`、`/resources`、`/settings`。
+- 学生新增表单必填校验：通过，未提交任何电话等敏感字段。
+- 课程排课表单必填校验：通过，未创建新课程。
+
+### browser-use CRUD 回归
+
+2026-04-28 追加执行学生和课程 CRUD 验证，测试数据限定为本轮创建的 `BU测试CRUD444724`。
+
+- 学生新增：通过，创建 `BU测试CRUD444724`，只填写必填项，未填写家长电话。
+- 学生查询：通过，按姓名搜索后列表显示 `共 1 名学生`。
+- 学生编辑：通过，将学校字段更新为 `BU测试学校已编辑`，详情页可见。
+- 课程新增：通过，为 `BU测试CRUD444724` 新增数学课程。
+- 课程查询：通过，课程周视图和列表视图均可见测试课程。
+- 课程编辑：通过，将课程时间从 `18:00-19:00` 调整为 `18:30-19:30`。
+- 课程删除：通过，删除后课程列表从 `共 2 条` 变为 `共 1 条`，测试课程行消失。
+- 学生删除：通过，软删除后默认学生列表按 `is_active=true` 查询，搜索 `BU测试CRUD444724` 显示 `共 0 名学生` 和空状态。
+- 修复记录：本轮发现管理端学生列表未传 `is_active=true`，导致软删除学生仍以“停课”显示在默认列表；已补充默认活跃学生过滤。
+
+### 浏览器控制台观察
+
+- 发现 Ant Design 运行时警告：`[antd: Spin] tip only work in nest or fullscreen pattern`。
+- 发现 Ant Design 运行时警告：`[antd: Modal] destroyOnClose is deprecated. Please use destroyOnHidden instead`。
+- 本轮未观察到页面白屏或业务阻断级 JS 异常。
 
 ## 已通过用例
 
@@ -115,41 +157,9 @@
 
 ## 失败用例
 
-### `BU-PROG-001` / `BU-PROG-002` 学习复盘页面失败
+2026-04-28 本轮非破坏性 browser-use 回归未发现阻断级失败。
 
-> 2026-04-27 代码修复记录：已将 `progressApi.listKnowledgePoints()` 改为读取分页响应中的 `items`，并通过 `admin-web` 构建验证。该 browser-use 用例仍需按最新代码重新执行后更新为正式通过记录。
-
-现象：
-
-- 访问 `/progress` 后页面白屏。
-- DOM snapshot 为空。
-- 浏览器控制台报错：
-
-```text
-TypeError: knowledgePoints.filter is not a function
-at ProgressPage (admin-web/src/pages/Progress/index.tsx:355)
-```
-
-原因定位：
-
-- 前端 `progressApi.listKnowledgePoints()` 声明返回 `KnowledgePoint[]`。
-- 实际后端 `/api/progress/knowledge-points` 返回分页结构：
-
-```json
-{"items":[],"total":0,"page":1,"page_size":50,"pages":0}
-```
-
-- `ProgressPage` 将该对象直接赋给 `knowledgePoints`，随后调用 `knowledgePoints.filter(...)` 导致白屏。
-
-影响：
-
-- 学习复盘页面不可用。
-- “记录成绩”按钮和知识点标签页无法测试。
-
-建议修复方向：
-
-- 将 `progressApi.listKnowledgePoints()` 改为读取 `response.data.items`，或后端改为返回数组。
-- 前端增加兜底：`setKnowledgePoints(Array.isArray(result) ? result : result.items ?? [])`。
+历史失败 `BU-PROG-001` / `BU-PROG-002` 学习复盘白屏已复测通过：访问 `/progress` 可见“学习复盘”“学生长期跟踪”“成绩记录”“知识点”等结构。
 
 ## 未执行用例
 
@@ -177,5 +187,6 @@ at ProgressPage (admin-web/src/pages/Progress/index.tsx:355)
 ## 测试执行备注
 
 - 早期若干失败是 browser-use 断言等待过早或按钮可访问名与用例描述不一致造成，已按实际 DOM 重跑并通过。
-- 当前真正阻塞功能的是学习复盘白屏问题。
-- 本次没有执行删除操作，避免清理用户本地数据。
+- 学习复盘白屏问题已在 2026-04-28 复测通过。
+- 本轮保留两个非阻断技术债：Ant Design `Spin tip` 用法警告、`Modal destroyOnClose` 过期警告。
+- 2026-04-28 追加 CRUD 回归时，仅在用户确认后删除本轮创建的 `BU测试CRUD444724` 测试课程和测试学生。

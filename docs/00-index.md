@@ -2,7 +2,7 @@
 
 > 状态：当前
 > 范围：全项目
-> 更新：2026-04-26
+> 更新：2026-04-28
 
 本目录是项目级文档治理入口，用于说明当前应该优先阅读哪些文档、归档材料如何使用、AI 会话记录如何归集。
 
@@ -10,6 +10,7 @@
 
 - `docs/04-implementation/documentation-workflow.md` — 文档归集规则、检索顺序、vibecoding 工作流和交接清单
 - `docs/04-implementation/doc-map.md` — 项目自有 Markdown 文档地图，列出每份文档的状态和用途
+- `docs/08-progress/project-status.md` — 当前进行态、并行工作流和下一步同步入口
 - `docs/07-changes/README.md` — 变更记录目录说明
 
 ## 当前活跃基线
@@ -21,6 +22,7 @@
 - `docs/01-product/teacher-v2/prd.md` — 当前老师端 PRD
 - `docs/02-design/teacher-v2/prototype.md` — 当前老师端原型说明
 - `docs/04-implementation/teacher-v2/plan.md` — 实施进度和剩余工作
+- `docs/08-progress/project-status.md` — 当前并行工作流和负责人同步
 
 ## 当前文档架构
 
@@ -34,6 +36,7 @@ docs/
   05-testing/
   06-ai-worklogs/
   07-changes/
+  08-progress/
   99-archive/
 ```
 
@@ -53,6 +56,12 @@ docs/
 ## AI 会话记录
 
 `.specstory/` 是原始 AI 会话历史。重要决策、进度变化和后续任务不能只留在原始对话里，应归纳到当前文档；如果不适合放入产品、设计、实现或架构文档，可归档到 `docs/06-ai-worklogs/`。
+
+## 进度同步
+
+多人并行开发、重构或测试刷新时，当前进行态统一记录到 `docs/08-progress/`。项目级总览见 `docs/08-progress/project-status.md`，具体工作流见 `docs/08-progress/workstreams/`。
+
+`docs/04-implementation/` 说明怎么做，`docs/08-progress/` 说明当前做到哪里，`docs/07-changes/` 说明已经确认或完成了什么。
 
 ## 变更记录
 
