@@ -67,7 +67,7 @@
 | 文档 | 状态 | 范围 | 用途 |
 | --- | --- | --- | --- |
 | `docs/04-implementation/backend/README.md` | 参考 | 后端 | 后端启动和开发参考 |
-| `docs/04-implementation/development-usage-guide.md` | 当前 | 全项目 | 本项目对 `ai-coding-workflow` 和 `document-governance-workflow` 两个通用 skill 的适配说明 |
+| `docs/04-implementation/development-usage-guide.md` | 当前 | 全项目 | 本项目对 `ai-coding-workflow`、`document-governance-workflow` 和 `agent-orchestration-workflow` 三个通用 skill 的适配说明 |
 | `docs/04-implementation/documentation-retrospective-2026-04-27.md` | 当前 | 全项目 | 当前文档结构复盘 |
 | `docs/05-testing/README.md` | 当前 | 全项目 | 测试文档统一入口 |
 | `docs/05-testing/testing-workflow.md` | 当前 | 全项目 | 测试流程指南，覆盖用例编写、执行动作、失败处理和文档归集 |

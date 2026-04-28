@@ -27,8 +27,11 @@
 
 - `ai-coding-workflow`：用于开发、修复、重构、性能定位、测试刷新和代码改动。
 - `document-governance-workflow`：用于创建、更新、归档、整理文档，维护变更记录、进度记录、checkpoint 和文档地图。
+- `agent-orchestration-workflow`：用于多 agent 调度、子 agent 任务书、ownership、结果审计和上下文隔离。
 
 使用 Claude Code 处理开发、修复、重构、测试刷新和文档治理时，先按对应 skill 进行任务分级、最小上下文读取、Phase/Gate 控制、验证和交接；再结合本文的当前基线、项目结构、命令、测试策略和文档沉淀规则执行。
+
+任务涉及多个独立工作流、跨模块并行、上下文压力较大，或需要创建子 agent 时，使用 `agent-orchestration-workflow`。主 agent 必须保留任务分级、Gate、ownership 分配、结果审计和最终交接职责。
 
 本项目适配说明见：`docs/04-implementation/development-usage-guide.md`。
 

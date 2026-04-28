@@ -1,4 +1,4 @@
-# 2026-04-28 AI 编码与文档治理 skill 沉淀
+# 2026-04-28 AI 编码、文档治理与多 agent skill 沉淀
 
 > 状态：当前
 > 范围：全项目
@@ -11,11 +11,12 @@
 
 ## 变更内容
 
-- 在外部工具包 `docs-governance-toolkit/skills/` 中沉淀两个 skill 源文件。
+- 在外部工具包 `docs-governance-toolkit/skills/` 中沉淀三个 skill 源文件。
 - 安装本地 skill 副本：`~/.agents/skills/ai-coding-workflow/SKILL.md`。
 - 安装本地 skill 副本：`~/.agents/skills/document-governance-workflow/SKILL.md`。
-- 将 `docs/04-implementation/development-usage-guide.md` 调整为本项目对两个通用 skill 的适配说明。
-- 在 `AGENTS.md` 和 `CLAUDE.md` 中引用两个 skill。
+- 新增并安装本地 skill 副本：`~/.agents/skills/agent-orchestration-workflow/SKILL.md`。
+- 将 `docs/04-implementation/development-usage-guide.md` 调整为本项目对三个通用 skill 的适配说明。
+- 在 `AGENTS.md` 和 `CLAUDE.md` 中引用三个 skill。
 - 更新 `docs/00-index.md` 和 `docs/04-implementation/doc-map.md` 中的说明。
 
 ## 影响范围
@@ -32,7 +33,7 @@
 
 - 是否影响旧数据：否。
 - 是否影响现有接口：否。
-- 是否影响多人并行开发：是，后续开发和文档治理应优先按两个 workflow skill 执行。
+- 是否影响多人并行开发：是，后续开发、文档治理和多 agent 调度应优先按对应 workflow skill 执行。
 - 是否需要迁移或回滚方案：否。
 
 ## 验证方式
@@ -46,6 +47,7 @@
 
 - 本地 skill：`~/.agents/skills/ai-coding-workflow/SKILL.md`
 - 本地 skill：`~/.agents/skills/document-governance-workflow/SKILL.md`
+- 本地 skill：`~/.agents/skills/agent-orchestration-workflow/SKILL.md`
 - 外部工具包：`/Users/dengjinhui/workspace/self/docs-governance-toolkit/skills/`
 - 项目适配：`docs/04-implementation/development-usage-guide.md`
 - 文档归集：`docs/04-implementation/documentation-workflow.md`
@@ -54,4 +56,4 @@
 
 ## 后续事项
 
-- [ ] 后续模拟讨论时按两个 workflow skill 逐阶段演练，并根据实际摩擦继续修订项目适配层、任务分级、Gate 和文档触发规则。
+- [ ] 后续模拟讨论时按三个 workflow skill 逐阶段演练，并根据实际摩擦继续修订项目适配层、任务分级、Gate、子 agent ownership 和文档触发规则。

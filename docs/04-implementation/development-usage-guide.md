@@ -4,14 +4,17 @@
 > 范围：全项目
 > 更新：2026-04-28
 
-本文是本项目对通用 AI 编码和文档治理流程的适配层。通用流程已沉淀为本地 skills，不在项目文档中重复维护：
+本文是本项目对通用 AI 编码、文档治理和多 agent 调度流程的适配层。通用流程已沉淀为本地 skills，不在项目文档中重复维护：
 
 - `ai-coding-workflow`：开发、修复、重构、性能定位、测试刷新和代码改动。
 - `document-governance-workflow`：文档创建、更新、归档、变更记录、进度记录、checkpoint 和文档地图维护。
+- `agent-orchestration-workflow`：多 agent 调度、子 agent 任务书、ownership、结果审计和上下文隔离。
 
-两个 skill 的源文件维护在外部工具包：`/Users/dengjinhui/workspace/self/docs-governance-toolkit/skills/`；本机 `~/.agents/skills/` 下的是安装副本。
+三个 skill 的源文件维护在外部工具包：`/Users/dengjinhui/workspace/self/docs-governance-toolkit/skills/`；本机 `~/.agents/skills/` 下的是安装副本。
 
-`AGENTS.md` 和 `CLAUDE.md` 已引用这两个 skill。模型执行任务时应先按 skill 判断流程，再按本文和仓库入口文档读取本项目上下文。
+`AGENTS.md` 和 `CLAUDE.md` 已引用这三个 skill。模型执行任务时应先按 skill 判断流程，再按本文和仓库入口文档读取本项目上下文。
+
+任务涉及多个独立工作流、跨模块并行、上下文压力较大，或需要创建子 agent 时，使用 `agent-orchestration-workflow`。主 agent 必须保留任务分级、Gate、ownership 分配、结果审计和最终交接职责。
 
 ## 1. 最小启动上下文
 

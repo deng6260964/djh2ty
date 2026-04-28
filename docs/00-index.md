@@ -9,7 +9,7 @@
 ## 从这里开始
 
 - `docs/04-implementation/documentation-workflow.md` — 文档归集规则、检索顺序、vibecoding 工作流和交接清单
-- `docs/04-implementation/development-usage-guide.md` — 本项目对 `ai-coding-workflow` 和 `document-governance-workflow` 两个通用 skill 的适配说明
+- `docs/04-implementation/development-usage-guide.md` — 本项目对 `ai-coding-workflow`、`document-governance-workflow` 和 `agent-orchestration-workflow` 三个通用 skill 的适配说明
 - `docs/04-implementation/doc-map.md` — 项目自有 Markdown 文档地图，列出每份文档的状态和用途
 - `docs/08-progress/project-status.md` — 当前进行态、并行工作流和下一步同步入口
 - `docs/07-changes/README.md` — 变更记录目录说明
