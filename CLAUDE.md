@@ -122,7 +122,9 @@ djy2ty/
     ├── 02-design/
     ├── 03-architecture/
     ├── 04-implementation/
-    ├── 05-ai-worklogs/
+    ├── 05-testing/
+    ├── 06-ai-worklogs/
+    ├── 07-changes/
     └── 99-archive/
 ```
 
@@ -265,6 +267,6 @@ Fixture 依赖链：`db` → `admin_user` → `async_client` + `auth_headers` + 
 文档维护规则：
 - 重要产品、实现进度或后续任务变化，应更新当前文档，而不是只留在 AI 对话记录中
 - `.specstory/` 属于原始 AI 会话历史，只作为参考材料
-- 已确认或已完成的重要变更，应新增记录到 `docs/06-changes/`
+- 已确认或已完成的重要变更，应新增记录到 `docs/07-changes/`
 - 长期文档应标注 `状态`、`范围`、`更新`
 - 新增、删除、重命名或改变长期 Markdown 文档定位时，应同步更新 `docs/04-implementation/doc-map.md`

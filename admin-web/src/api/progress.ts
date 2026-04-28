@@ -41,8 +41,8 @@ export const progressApi = {
     subject?: string
     status?: string
   }): Promise<KnowledgePoint[]> => {
-    const response = await client.get<KnowledgePoint[]>('/api/progress/knowledge-points', { params })
-    return response.data
+    const response = await client.get<PaginatedResponse<KnowledgePoint>>('/api/progress/knowledge-points', { params })
+    return response.data.items
   },
 
   upsertKnowledgePoint: async (data: Omit<KnowledgePoint, 'id'>): Promise<KnowledgePoint> => {

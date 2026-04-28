@@ -10,9 +10,10 @@
 
 | 目录 | 记录对象 | 主要用途 |
 | --- | --- | --- |
-| `docs/04-implementation/` | 计划、任务拆解、测试用例、验证记录 | 推进实现和交接工作 |
-| `docs/05-ai-worklogs/` | AI 会话中提炼出的过程结论 | 保留 vibecoding 上下文 |
-| `docs/06-changes/` | 已经完成或已经确认的变更 | 追溯变更、辅助多人并行协作 |
+| `docs/04-implementation/` | 计划、任务拆解、研发交接 | 推进实现和交接工作 |
+| `docs/05-testing/` | 测试策略、测试用例、测试报告、验证记录 | 统一管理测试资产 |
+| `docs/06-ai-worklogs/` | AI 会话中提炼出的过程结论 | 保留 vibecoding 上下文 |
+| `docs/07-changes/` | 已经完成或已经确认的变更 | 追溯变更、辅助多人并行协作 |
 
 ## 什么时候需要新增变更记录
 
@@ -33,14 +34,14 @@
 按年月分组，文件名使用日期加主题：
 
 ```text
-docs/06-changes/YYYY-MM/YYYY-MM-DD-topic.md
+docs/07-changes/YYYY-MM/YYYY-MM-DD-topic.md
 ```
 
 示例：
 
 ```text
-docs/06-changes/2026-04/2026-04-27-doc-structure-cleanup.md
-docs/06-changes/2026-04/2026-04-27-teacher-v2-billing-rule.md
+docs/07-changes/2026-04/2026-04-27-doc-structure-cleanup.md
+docs/07-changes/2026-04/2026-04-27-teacher-v2-billing-rule.md
 ```
 
 ## 写入规则
@@ -55,4 +56,4 @@ docs/06-changes/2026-04/2026-04-27-teacher-v2-billing-rule.md
 
 新建记录时复制：
 
-- `docs/06-changes/template/change-record-template.md`
+- `docs/07-changes/template/change-record-template.md`

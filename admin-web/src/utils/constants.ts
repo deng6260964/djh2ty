@@ -15,6 +15,9 @@ export const COURSE_STATUSES = [
   { value: 'scheduled', label: '待上课', color: 'blue' },
   { value: 'completed', label: '已完成', color: 'green' },
   { value: 'cancelled', label: '已取消', color: 'default' },
+  { value: 'student_leave_pending_makeup', label: '学生请假待补', color: 'orange' },
+  { value: 'teacher_leave_pending_makeup', label: '老师请假待补', color: 'gold' },
+  { value: 'makeup_scheduled', label: '已安排补课', color: 'purple' },
 ]
 
 export const ASSIGNMENT_STATUSES = [

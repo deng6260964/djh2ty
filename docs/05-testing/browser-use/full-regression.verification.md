@@ -4,7 +4,7 @@
 > 范围：管理端
 > 更新：2026-04-26
 > 验证时间：2026-04-26
-> 验证目标：`docs/04-implementation/admin-web/browser-use/full-regression.spec.md`
+> 验证目标：`docs/05-testing/browser-use/full-regression.spec.md`
 > 验证方式：Codex in-app browser + `browser-use`，辅以后端 API 创建测试数据。
 
 ## 环境
@@ -116,6 +116,8 @@
 ## 失败用例
 
 ### `BU-PROG-001` / `BU-PROG-002` 学习复盘页面失败
+
+> 2026-04-27 代码修复记录：已将 `progressApi.listKnowledgePoints()` 改为读取分页响应中的 `items`，并通过 `admin-web` 构建验证。该 browser-use 用例仍需按最新代码重新执行后更新为正式通过记录。
 
 现象：
 

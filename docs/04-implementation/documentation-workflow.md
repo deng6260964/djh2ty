@@ -2,9 +2,9 @@
 
 > 状态：当前
 > 范围：全项目
-> 更新：2026-04-26
+> 更新：2026-04-27
 
-本文定义项目文档如何组织、更新和交接。目标是在 vibecoding 过程中，让 AI 模型和后续研发都能快速找到当前事实、历史背景和下一步工作。
+本文定义当前 `docs/` 新结构下，文档如何组织、更新、验证和交接。目标是在 vibecoding、多 agent 协作和多人研发过程中，让模型与研发都能快速找到当前事实、历史背景、测试依据和变更记录。
 
 ## 1. 文档原则
 
@@ -12,7 +12,7 @@
 
 当前活跃产品基线是老师端 V2 改造。当旧文档与当前基线冲突时，默认以当前文档为准；只有在明确做历史对照时才阅读历史文档。
 
-当前事实源文档：
+当前事实源文档按这个顺序读取：
 
 - `docs/01-product/current.md` — 当前产品基线入口
 - `docs/01-product/teacher-v2/status.md` — 当前状态、下一步和优先级
@@ -20,9 +20,9 @@
 - `docs/02-design/teacher-v2/prototype.md` — 当前老师端原型说明
 - `docs/04-implementation/teacher-v2/plan.md` — 实施进度和剩余工作
 
-完整项目自有 Markdown 文档清单见 `docs/04-implementation/doc-map.md`。
+完整项目自有 Markdown 文档清单见 `docs/04-implementation/doc-map.md`。测试资产见 `docs/05-testing/README.md`。重要完成态变更见 `docs/07-changes/README.md`。
 
-旧文档如 `docs/99-archive/legacy/product/prd-v1.md`、`docs/99-archive/legacy/design/web-wireframes-v1.md` 只作为历史对照材料。
+归档文档如 `docs/99-archive/legacy/product/prd-v1.md`、`docs/99-archive/legacy/design/web-wireframes-v1.md` 只作为历史对照材料，不作为当前决策依据。
 
 ### 1.2 文档必须声明角色
 
@@ -48,7 +48,7 @@ AI 对话、`.specstory/` 历史、截图、临时调查笔记和生成过程材
 
 ## 2. 推荐检索顺序
 
-修改产品行为前，按以下顺序阅读：
+修改产品行为、设计、架构或实现前，按以下顺序阅读：
 
 1. `docs/00-index.md`
 2. `docs/04-implementation/documentation-workflow.md`
@@ -58,8 +58,10 @@ AI 对话、`.specstory/` 历史、截图、临时调查笔记和生成过程材
 6. `docs/01-product/teacher-v2/prd.md`
 7. `docs/02-design/teacher-v2/prototype.md`
 8. `docs/04-implementation/teacher-v2/plan.md`
-9. 与任务相关的 `docs/03-architecture/` 文档
-10. 仅在明确做历史对照时阅读历史文档
+9. 涉及测试时阅读 `docs/05-testing/README.md` 和相关用例 / 验证记录
+10. 涉及历史变更时阅读 `docs/07-changes/`
+11. 涉及技术或部署时阅读 `docs/03-architecture/`
+12. 仅在明确做历史对照时阅读 `docs/99-archive/`
 
 老师端 V2 工作中，`docs/01-product/teacher-v2/status.md` 是最快的项目状态入口。
 
@@ -73,9 +75,10 @@ AI 对话、`.specstory/` 历史、截图、临时调查笔记和生成过程材
 | `docs/01-product/` | 产品需求、状态、业务流程、历史需求 | 当前 V2 产品事实源放在 `teacher-v2/` |
 | `docs/02-design/` | 原型、线框、设计规范、交互说明 | 当前 V2 设计事实源放在 `teacher-v2/` |
 | `docs/03-architecture/` | API、数据模型、部署、技术栈 | 真实代码变化后再更新，避免写成纯设想 |
-| `docs/04-implementation/` | 实施计划、文档流程、测试和验证记录 | 研发推进和交接材料放在这里 |
-| `docs/05-ai-worklogs/` | AI 工作日志 | 仅存放提炼后的会话结论，不放原始长对话 |
-| `docs/06-changes/` | 变更记录 | 记录已确认或已完成的重要变更 |
+| `docs/04-implementation/` | 实施计划、任务拆解、研发交接和文档流程 | 研发推进和交接材料放在这里 |
+| `docs/05-testing/` | 测试用例、测试报告、验证记录 | 测试资产统一入口，包含后端 pytest 报告和管理端 browser-use 用例 |
+| `docs/06-ai-worklogs/` | AI 工作日志 | 仅存放提炼后的会话结论，不放原始长对话 |
+| `docs/07-changes/` | 变更记录 | 记录已确认或已完成的重要变更 |
 | `docs/99-archive/` | 已归档材料 | 仅保留记录，不作为当前决策依据 |
 | `.specstory/` | 原始 AI 会话历史 | 不作为当前产品事实 |
 
@@ -88,7 +91,8 @@ AI 对话、`.specstory/` 历史、截图、临时调查笔记和生成过程材
 1. 按推荐检索顺序阅读当前基线文档。
 2. 判断影响面：`backend`、`admin-web`、`student-web`、`miniprogram`、纯文档，或多个端。
 3. 确认需求是否符合老师端 V2 方向。
-4. 如果产品行为不清楚，先澄清目标行为，再改代码。
+4. 检查是否已有相关 `docs/07-changes/` 记录，避免重复推翻既有决策。
+5. 如果产品行为不清楚，先澄清目标行为，再改代码。
 
 ### 4.2 编码中
 
@@ -100,6 +104,7 @@ AI 对话、`.specstory/` 历史、截图、临时调查笔记和生成过程材
 - 工作流或验收标准发生变化
 - 实施阶段完成或优先级调整
 - 引入新的技术约定
+- 测试策略、测试用例或验证结果发生变化
 - 后续研发如果不看 AI 对话就无法理解上下文
 
 ### 4.3 编码后
@@ -113,21 +118,137 @@ AI 对话、`.specstory/` 历史、截图、临时调查笔记和生成过程材
 | 产品行为或验收标准变化 | 更新当前 PRD 或相关流程文档 |
 | UI / 交互行为变化 | 更新 `docs/02-design/` 下相关文档 |
 | API、数据结构、部署或技术约定变化 | 更新 `docs/03-architecture/` 下相关文档 |
-| 已确认或已完成的重要变更 | 在 `docs/06-changes/` 下按年月新增变更记录 |
+| 测试用例、测试策略或验证结果变化 | 更新 `docs/05-testing/` 下相关文档 |
+| 已确认或已完成的重要变更 | 在 `docs/07-changes/` 下按年月新增变更记录 |
+| AI 会话中产生可复用过程结论 | 在 `docs/06-ai-worklogs/` 下新增工作日志 |
 | 只有代码变化且文档仍准确 | 不需要更新文档，但在交接说明中说明这一点 |
 
-## 5. 变更记录
+## 5. 按目录更新规则
+
+### 5.1 产品文档
+
+更新位置：
+
+- `docs/01-product/current.md`
+- `docs/01-product/teacher-v2/status.md`
+- `docs/01-product/teacher-v2/prd.md`
+
+适用情况：
+
+- 产品目标、优先级、验收标准发生变化
+- 当前阶段判断发生变化
+- 旧产品假设被废弃或替换
+
+### 5.2 设计文档
+
+更新位置：
+
+- `docs/02-design/teacher-v2/prototype.md`
+- `docs/02-design/teacher-v2/flow-prototype.md`
+- `docs/02-design/design-system.md`
+- `docs/02-design/interaction-guide.md`
+
+适用情况：
+
+- 页面结构、用户路径、核心交互发生变化
+- 设计规范或通用交互约定发生变化
+
+### 5.3 架构文档
+
+更新位置：
+
+- `docs/03-architecture/tech-stack.md`
+- `docs/03-architecture/deployment.md`
+
+适用情况：
+
+- 技术栈、部署方式、运行环境发生变化
+- 跨模块技术约定发生变化
+
+如果后续出现大量跨模块决策，建议新增 `docs/03-architecture/decisions/` 存放 ADR。
+
+### 5.4 实施文档
+
+更新位置：
+
+- `docs/04-implementation/teacher-v2/plan.md`
+- `docs/04-implementation/backend/README.md`
+- `docs/04-implementation/documentation-workflow.md`
+- `docs/04-implementation/doc-map.md`
+
+适用情况：
+
+- 任务阶段、实现计划、开发交接方式发生变化
+- 后端启动、开发或调试方式发生变化
+- 文档结构发生变化
+
+如果多人并行需求增多，建议新增 `docs/04-implementation/workstreams/` 存放并行任务流。
+
+### 5.5 测试文档
+
+更新位置：
+
+- `docs/05-testing/README.md`
+- `docs/05-testing/backend/test-report.md`
+- `docs/05-testing/browser-use/*.spec.md`
+- `docs/05-testing/browser-use/*.verification.md`
+
+适用情况：
+
+- 新增或调整测试用例
+- 重新执行 browser-use 或后端测试
+- 测试环境、测试数据、未执行项发生变化
+
+### 5.6 AI 工作日志
+
+更新位置：
+
+- `docs/06-ai-worklogs/`
+
+适用情况：
+
+- AI 会话产生了有复用价值的过程结论
+- 结论不适合放入 PRD、实现计划、测试记录或变更记录
+
+不要把完整聊天记录粘贴进去，只保留目标、决策、影响范围、验证和后续任务。
+
+### 5.7 变更记录
+
+更新位置：
+
+- `docs/07-changes/YYYY-MM/YYYY-MM-DD-topic.md`
+
+适用情况：
+
+- 已确认或已完成的重要变更
+- 需要解释“为什么变、变了什么、影响哪里、如何验证”
+
+### 5.8 归档文档
+
+更新位置：
+
+- `docs/99-archive/`
+
+适用情况：
+
+- 文档已经不再适合作为当前事实源
+- 文档仍有历史对照价值
+- 旧 API、旧数据结构、旧 PRD、旧线框需要避免误导后续模型
+
+归档文档状态必须为 `归档`。
+
+## 6. 变更记录
 
 当一次开发、重构或文档整理产生了可追溯的结果，应新增变更记录。变更记录面向团队协作，重点说明事实结果，不记录完整过程。
 
 推荐位置：
 
-推荐按 docs/06-changes/年月/日期-主题.md 存放。
+推荐按 docs/07-changes/年月/日期-主题.md 存放。
 
 模板：
 
 ```text
-docs/06-changes/template/change-record-template.md
+docs/07-changes/template/change-record-template.md
 ```
 
 变更记录应包含：
@@ -140,13 +261,13 @@ docs/06-changes/template/change-record-template.md
 - 关联文档
 - 后续事项
 
-## 6. AI 工作日志
+## 7. AI 工作日志
 
 只有当一次会话产生了有复用价值、但不适合放入 PRD、实施计划或架构文档的决策时，才创建 AI 工作日志。
 
 推荐位置：
 
-推荐按 docs/05-ai-worklogs/日期-主题.md 存放。
+推荐按 docs/06-ai-worklogs/日期-主题.md 存放。
 
 推荐模板：
 
@@ -177,7 +298,7 @@ docs/06-changes/template/change-record-template.md
 
 不要把完整聊天记录粘贴进工作日志。只总结决策、影响范围、验证结果和后续任务。
 
-## 7. 命名规则
+## 8. 命名规则
 
 长期文档使用清晰的 kebab-case 文件名：
 
@@ -197,7 +318,7 @@ docs/06-changes/template/change-record-template.md
 - `2026-04-26-doc-architecture.md`
 - `2026-04-26-teacher-v2-handoff.md`
 
-## 8. 交接清单
+## 9. 交接清单
 
 完成较大任务前，回答这些问题：
 
@@ -205,14 +326,16 @@ docs/06-changes/template/change-record-template.md
 - 某个实施阶段是否推进了？
 - 产品行为是否与当前 PRD 或原型相比发生变化？
 - API、数据结构、部署或测试约定是否发生变化？
-- 是否需要新增一条 `docs/06-changes/` 变更记录？
+- 测试用例或验证记录是否需要更新？
+- 是否需要新增一条 `docs/07-changes/` 变更记录？
+- 是否有 AI 会话结论需要沉淀到 `docs/06-ai-worklogs/`？
 - 后续研发是否能不看原始 AI 对话也理解当前状态？
 
 只要任一答案为“是”，就应在交接前更新相关当前文档。
 
 新增、删除、重命名长期 Markdown 文档，或改变文档角色时，应在同一次改动中更新 `docs/04-implementation/doc-map.md`。
 
-## 9. 当前目录结构
+## 10. 当前目录结构
 
 ```text
 docs/
@@ -221,8 +344,9 @@ docs/
   02-design/
   03-architecture/
   04-implementation/
-  05-ai-worklogs/
-  06-changes/
+  05-testing/
+  06-ai-worklogs/
+  07-changes/
   99-archive/
 ```
 

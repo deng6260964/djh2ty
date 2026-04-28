@@ -2,7 +2,7 @@
 
 > 状态：参考
 > 范围：后端
-> 更新：2026-04-26
+> 更新：2026-04-27
 > 说明：后端测试覆盖快照；当前测试结果以最新本地 `pytest` 运行为准。
 
 ## 测试环境说明
@@ -30,9 +30,9 @@
 | 作业管理（assignments） | test_assignments.py | 13 |
 | 收费管理（billing） | test_billing.py | 16 |
 | 资料管理（resources） | test_resources.py | 19 |
-| 集成测试 | test_integration.py | 8 |
+| 集成测试 | test_integration.py | 12 |
 | 老师端 V2 聚合接口 | test_teacher_workbench.py | 4 |
-| **合计** | **8 个文件** | **116 个用例** |
+| **合计** | **8 个文件** | **120 个用例** |
 
 ---
 
@@ -62,7 +62,9 @@
 | US-505 | 欠费提醒 | AC1:欠费学生有视觉标识（API层验证列表准确性） | 已覆盖 |
 | V2-WB | 老师工作台 | 今日课程、待补记录、待收费、待批改聚合及精确断言 | 已覆盖 |
 | V2-ACC | 学生预收账户 | 充值、余额、最近收款/扣费、收费提醒解除 | 已覆盖 |
-| V2-AUTO-CHARGE | 完成课程自动扣费 | 完成课程后生成扣费记录并更新余额 | 目标用例已标记 xfail，待实现 |
+| V2-AUTO-CHARGE | 完成课程自动扣费 | 完成课程后生成扣费记录并更新余额；重复完成不重复扣费；已扣费课程取消或删除后回滚自动扣费 | 已覆盖 |
+| V2-COURSE-DETAIL | 课程详情闭环 | 详情聚合、课后记录、可选作业、保存并完成、自动扣费 | 已覆盖 |
+| V2-MAKEUP | 请假与待补课池 | 学生/老师请假转待补课池、安排补课、原课程移出待补池 | 已覆盖 |
 | V2-COPY-WEEK | 复制上一周课程 | 预览冲突/收费风险、确认复制、冲突跳过 | 已覆盖 |
 | US-701 | 上传教学资料 | AC1:支持类型/50MB限制、AC3:文件类型错误400 | 已覆盖 |
 | US-702 | 分类管理资料 | AC1:按科目筛选、AC3:删除后不可访问 | 已覆盖 |
@@ -156,7 +158,9 @@
 | 日历展示已创建课程 | test_integration.py::TestCourseWorkflow | 日历接口包含新创建的课程 |
 | 完整作业流程 | test_integration.py::TestAssignmentWorkflow | 布置→查看pending→批改→查看graded |
 | 手工收费记录闭环 | test_integration.py::TestBillingWorkflow | 设单价→创收费→汇总→付款→欠费列表 |
-| V2 自动扣费目标闭环 | test_integration.py::TestTeacherV2AccountCourseFlow | 充值→排课→完成→自动扣费→余额更新（strict xfail） |
+| V2 自动扣费目标闭环 | test_integration.py::TestTeacherV2AccountCourseFlow | 充值→排课→完成→自动扣费→余额更新；重复完成幂等；取消或删除已完成课程回滚自动扣费 |
+| V2 课程详情闭环 | test_integration.py::TestTeacherV2AccountCourseFlow | 课程详情聚合→保存课后记录→可选布置作业→完成课程→自动扣费 |
+| V2 请假待补闭环 | test_integration.py::TestTeacherV2AccountCourseFlow | 请假→进入待补课池→安排补课→原课程关闭待补状态 |
 | 学生详情统计 | test_integration.py::TestStudentDetailWorkflow | 课程数/完成数反映在统计中 |
 | 冲突详情内容 | test_integration.py::TestConflictDetectionEdgeCases | 冲突响应包含冲突课程信息 |
 | 搜索创建后可见 | test_integration.py::TestSearchAndFilterWorkflow | 创建后立即可通过姓名搜索 |

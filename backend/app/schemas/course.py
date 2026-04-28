@@ -34,6 +34,50 @@ class CourseStatusUpdate(BaseModel):
     status: str  # scheduled | completed | cancelled
 
 
+class CourseLeaveRequest(BaseModel):
+    leave_type: str  # student | teacher
+    reason: Optional[str] = None
+    turn_to_makeup: bool = True
+
+
+class CourseMakeupRequest(BaseModel):
+    start_time: datetime
+    end_time: datetime
+    notes: Optional[str] = None
+
+    @model_validator(mode="after")
+    def validate_times(self):
+        if self.end_time <= self.start_time:
+            raise ValueError("结束时间必须晚于开始时间")
+        return self
+
+
+class CourseCompleteAssignment(BaseModel):
+    enabled: bool = False
+    title: Optional[str] = None
+    content: Optional[str] = None
+    due_date: Optional[date] = None
+
+
+class CourseCompleteRequest(BaseModel):
+    performance: str
+    knowledge_mastery: Optional[str] = None
+    problems: Optional[str] = None
+    next_plan: Optional[str] = None
+    rating: Optional[int] = None
+    assignment: Optional[CourseCompleteAssignment] = None
+
+
+class CourseCompleteResponse(BaseModel):
+    course_status: str
+    charge_amount: float
+    balance_before: float
+    balance_after: float
+    payment_alert_triggered: bool
+    feedback_id: Optional[int] = None
+    assignment_id: Optional[int] = None
+
+
 class ConflictCheckRequest(BaseModel):
     start_time: datetime
     end_time: datetime
@@ -69,6 +113,20 @@ class CourseResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class CourseDetailV2Response(BaseModel):
+    course: CourseResponse
+    student: Dict[str, Any]
+    account: Dict[str, Any]
+    projected_charge: float
+    recent_feedback: List[Dict[str, Any]]
+    recent_assignments: List[Dict[str, Any]]
+
+
+class MakeupPoolResponse(BaseModel):
+    items: List[CourseResponse]
+    total: int
 
 
 class CourseListResponse(BaseModel):

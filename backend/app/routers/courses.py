@@ -7,6 +7,7 @@ from sqlalchemy import select, func, and_
 from app.database import get_db
 from app.models.course import Course
 from app.models.student import Student
+from app.models.assignment import Assignment, AssignmentStudent
 from app.models.billing import SubjectPrice, BillingRecord
 from app.schemas.course import (
     CourseCreate, CourseUpdate, CourseStatusUpdate,
@@ -14,11 +15,22 @@ from app.schemas.course import (
     CourseResponse, CourseListResponse, CalendarCourseItem,
     CopyWeekPreviewRequest, CopyWeekPreviewResponse, CopyWeekPreviewItem,
     CopyWeekConfirmRequest, CopyWeekConfirmResponse, CopyWeekConfirmSkippedItem,
+    CourseCompleteRequest, CourseCompleteResponse, CourseDetailV2Response,
+    CourseLeaveRequest, CourseMakeupRequest, MakeupPoolResponse,
 )
+from app.models.feedback import Feedback
 from app.dependencies import get_admin_user, get_current_student
 from app.models.user import User
 
 router = APIRouter(prefix="/courses", tags=["课程管理"])
+
+AUTO_CHARGE_NOTE = "课程完成自动扣费"
+NON_CONFLICT_STATUSES = {
+    "cancelled",
+    "student_leave_pending_makeup",
+    "teacher_leave_pending_makeup",
+    "makeup_scheduled",
+}
 
 
 async def _build_balance_map(db: AsyncSession) -> dict[int, float]:
@@ -33,6 +45,65 @@ async def _build_balance_map(db: AsyncSession) -> dict[int, float]:
 def _project_charge(course: Course) -> float:
     hourly_rate = float(course.hourly_rate or 0)
     return round(hourly_rate * ((course.duration or 0) / 60), 2)
+
+
+async def _ensure_course_auto_charge(db: AsyncSession, course: Course) -> None:
+    existing_result = await db.execute(
+        select(BillingRecord).where(
+            BillingRecord.course_id == course.id,
+            BillingRecord.student_id == course.student_id,
+            BillingRecord.notes == AUTO_CHARGE_NOTE,
+        )
+    )
+    if existing_result.scalar_one_or_none():
+        return
+
+    hourly_rate = float(course.hourly_rate or 0)
+    if hourly_rate <= 0:
+        price_result = await db.execute(
+            select(SubjectPrice).where(SubjectPrice.subject == course.subject)
+        )
+        price = price_result.scalar_one_or_none()
+        if price:
+            hourly_rate = float(price.price_per_hour)
+
+    charge_amount = round(hourly_rate * ((course.duration or 0) / 60), 2)
+    if charge_amount <= 0:
+        return
+
+    db.add(
+        BillingRecord(
+            student_id=course.student_id,
+            course_id=course.id,
+            amount=charge_amount,
+            paid_amount=0,
+            status="paid",
+            notes=AUTO_CHARGE_NOTE,
+        )
+    )
+
+
+async def _rollback_course_auto_charge(db: AsyncSession, course: Course) -> None:
+    result = await db.execute(
+        select(BillingRecord).where(
+            BillingRecord.course_id == course.id,
+            BillingRecord.student_id == course.student_id,
+            BillingRecord.notes == AUTO_CHARGE_NOTE,
+        )
+    )
+    for record in result.scalars().all():
+        await db.delete(record)
+
+
+async def _get_student_balance(db: AsyncSession, student_id: int) -> float:
+    result = await db.execute(
+        select(BillingRecord).where(BillingRecord.student_id == student_id)
+    )
+    records = result.scalars().all()
+    return round(
+        sum(float(record.paid_amount or 0) - float(record.amount or 0) for record in records),
+        2,
+    )
 
 
 def _copy_course_time(course: Course, source_week_start: date, target_week_start: date) -> tuple[datetime, datetime]:
@@ -127,7 +198,7 @@ async def check_time_conflict(
     query = select(Course, Student.name.label("student_name")).join(
         Student, Course.student_id == Student.id
     ).where(
-        Course.status != "cancelled",
+        Course.status.notin_(NON_CONFLICT_STATUSES),
         Course.start_time < end_time,
         Course.end_time > start_time,
     )
@@ -529,6 +600,304 @@ async def create_course(
     return response
 
 
+@router.get("/makeup-pool", response_model=MakeupPoolResponse)
+async def get_makeup_pool(
+    current_user: User = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """待补课池：学生/老师请假后等待重新安排的课程"""
+    del current_user
+    result = await db.execute(
+        select(Course, Student.name.label("student_name"))
+        .join(Student, Course.student_id == Student.id)
+        .where(Course.status.in_(["student_leave_pending_makeup", "teacher_leave_pending_makeup"]))
+        .order_by(Course.start_time.asc())
+    )
+    rows = result.all()
+    items = []
+    for course, student_name in rows:
+        response = CourseResponse.model_validate(course)
+        response.student_name = student_name
+        items.append(response)
+    return MakeupPoolResponse(items=items, total=len(items))
+
+
+@router.get("/{course_id}/detail-v2", response_model=CourseDetailV2Response)
+async def get_course_detail_v2(
+    course_id: int,
+    current_user: User = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """老师端 V2 课程详情：课程、账户、最近反馈和作业摘要"""
+    del current_user
+
+    result = await db.execute(
+        select(Course, Student).join(
+            Student, Course.student_id == Student.id
+        ).where(Course.id == course_id)
+    )
+    row = result.first()
+    if not row:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "COURSE_NOT_FOUND", "message": "课程不存在"},
+        )
+    course, student = row
+
+    course_response = CourseResponse.model_validate(course)
+    course_response.student_name = student.name
+    current_balance = await _get_student_balance(db, student.id)
+    projected_charge = _project_charge(course)
+
+    feedback_result = await db.execute(
+        select(Feedback)
+        .where(Feedback.student_id == student.id)
+        .order_by(Feedback.created_at.desc())
+        .limit(3)
+    )
+    recent_feedback = [
+        {
+            "id": item.id,
+            "course_id": item.course_id,
+            "performance": item.performance,
+            "problems": item.problems,
+            "next_plan": item.next_plan,
+            "rating": item.rating,
+            "created_at": item.created_at,
+        }
+        for item in feedback_result.scalars().all()
+    ]
+
+    assignment_result = await db.execute(
+        select(Assignment, AssignmentStudent)
+        .join(AssignmentStudent, AssignmentStudent.assignment_id == Assignment.id)
+        .where(AssignmentStudent.student_id == student.id)
+        .order_by(Assignment.created_at.desc())
+        .limit(3)
+    )
+    recent_assignments = [
+        {
+            "id": assignment.id,
+            "title": assignment.title,
+            "subject": assignment.subject,
+            "due_date": assignment.due_date,
+            "status": assignment_student.status,
+            "score": assignment_student.score,
+        }
+        for assignment, assignment_student in assignment_result.all()
+    ]
+
+    return CourseDetailV2Response(
+        course=course_response,
+        student={
+            "id": student.id,
+            "name": student.name,
+            "grade": student.grade,
+            "subjects": student.subjects,
+            "parent_name": student.parent_name,
+            "parent_phone": student.parent_phone,
+        },
+        account={
+            "current_balance": current_balance,
+            "projected_charge": projected_charge,
+            "needs_payment": current_balance < projected_charge,
+        },
+        projected_charge=projected_charge,
+        recent_feedback=recent_feedback,
+        recent_assignments=recent_assignments,
+    )
+
+
+@router.post("/{course_id}/complete", response_model=CourseCompleteResponse)
+async def complete_course_v2(
+    course_id: int,
+    data: CourseCompleteRequest,
+    current_user: User = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """保存课后记录并完成课程，可选同步布置作业和自动扣费"""
+    del current_user
+
+    if not data.performance.strip():
+        raise HTTPException(
+            status_code=422,
+            detail={"code": "PERFORMANCE_REQUIRED", "message": "请填写课后记录"},
+        )
+
+    result = await db.execute(select(Course).where(Course.id == course_id))
+    course = result.scalar_one_or_none()
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "COURSE_NOT_FOUND", "message": "课程不存在"},
+        )
+
+    balance_before = await _get_student_balance(db, course.student_id)
+
+    feedback = Feedback(
+        course_id=course.id,
+        student_id=course.student_id,
+        performance=data.performance,
+        knowledge_mastery=data.knowledge_mastery,
+        problems=data.problems,
+        next_plan=data.next_plan,
+        rating=data.rating,
+    )
+    db.add(feedback)
+    await db.flush()
+
+    assignment_id = None
+    if data.assignment and data.assignment.enabled:
+        if not data.assignment.title or not data.assignment.content or not data.assignment.due_date:
+            raise HTTPException(
+                status_code=422,
+                detail={"code": "ASSIGNMENT_REQUIRED", "message": "请填写作业标题、内容和截止日期"},
+            )
+        assignment = Assignment(
+            title=data.assignment.title,
+            content=data.assignment.content,
+            subject=course.subject,
+            due_date=data.assignment.due_date,
+        )
+        db.add(assignment)
+        await db.flush()
+        db.add(
+            AssignmentStudent(
+                assignment_id=assignment.id,
+                student_id=course.student_id,
+                status="pending",
+            )
+        )
+        assignment_id = assignment.id
+
+    course.status = "completed"
+    await _ensure_course_auto_charge(db, course)
+    charge_amount = _project_charge(course)
+    await db.commit()
+    await db.refresh(course)
+
+    balance_after = await _get_student_balance(db, course.student_id)
+
+    return CourseCompleteResponse(
+        course_status=course.status,
+        charge_amount=charge_amount,
+        balance_before=balance_before,
+        balance_after=balance_after,
+        payment_alert_triggered=balance_after < 0,
+        feedback_id=feedback.id,
+        assignment_id=assignment_id,
+    )
+
+
+@router.post("/{course_id}/leave", response_model=CourseResponse)
+async def mark_course_leave(
+    course_id: int,
+    data: CourseLeaveRequest,
+    current_user: User = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """标记学生/老师请假，默认转入待补课池"""
+    del current_user
+    if data.leave_type not in ("student", "teacher"):
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "INVALID_LEAVE_TYPE", "message": "请假类型必须是 student 或 teacher"},
+        )
+
+    result = await db.execute(
+        select(Course, Student.name.label("student_name")).join(
+            Student, Course.student_id == Student.id
+        ).where(Course.id == course_id)
+    )
+    row = result.first()
+    if not row:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "COURSE_NOT_FOUND", "message": "课程不存在"},
+        )
+    course, student_name = row
+    if course.status == "completed":
+        await _rollback_course_auto_charge(db, course)
+
+    if data.turn_to_makeup:
+        course.status = f"{data.leave_type}_leave_pending_makeup"
+    else:
+        course.status = "cancelled"
+
+    leave_label = "学生请假" if data.leave_type == "student" else "老师请假"
+    note = f"{leave_label}"
+    if data.reason:
+        note += f"：{data.reason}"
+    course.notes = f"{course.notes or ''}\n{note}".strip()
+
+    await db.commit()
+    await db.refresh(course)
+    response = CourseResponse.model_validate(course)
+    response.student_name = student_name
+    return response
+
+
+@router.post("/{course_id}/makeup", response_model=CourseResponse, status_code=status.HTTP_201_CREATED)
+async def schedule_makeup_course(
+    course_id: int,
+    data: CourseMakeupRequest,
+    current_user: User = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """为待补课池中的课程安排补课"""
+    del current_user
+
+    result = await db.execute(
+        select(Course, Student.name.label("student_name")).join(
+            Student, Course.student_id == Student.id
+        ).where(Course.id == course_id)
+    )
+    row = result.first()
+    if not row:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "COURSE_NOT_FOUND", "message": "课程不存在"},
+        )
+    course, student_name = row
+    if course.status not in ("student_leave_pending_makeup", "teacher_leave_pending_makeup"):
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "COURSE_NOT_IN_MAKEUP_POOL", "message": "课程不在待补课池中"},
+        )
+
+    conflict = await check_time_conflict(db, data.start_time, data.end_time, exclude_id=course.id)
+    if conflict:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "code": "COURSE_TIME_CONFLICT",
+                "message": "该时间段已有其他课程安排",
+                "detail": conflict,
+            },
+        )
+
+    duration = int((data.end_time - data.start_time).total_seconds() / 60)
+    makeup_course = Course(
+        student_id=course.student_id,
+        subject=course.subject,
+        start_time=data.start_time,
+        end_time=data.end_time,
+        duration=duration,
+        status="scheduled",
+        location=course.location,
+        hourly_rate=course.hourly_rate,
+        notes=data.notes or f"补课，来源课程 #{course.id}",
+    )
+    db.add(makeup_course)
+    course.status = "makeup_scheduled"
+    course.notes = f"{course.notes or ''}\n已安排补课 #{makeup_course.id}".strip()
+    await db.commit()
+    await db.refresh(makeup_course)
+    response = CourseResponse.model_validate(makeup_course)
+    response.student_name = student_name
+    return response
+
+
 @router.get("/{course_id}", response_model=CourseResponse)
 async def get_course(
     course_id: int,
@@ -618,6 +987,7 @@ async def delete_course(
             status_code=404,
             detail={"code": "COURSE_NOT_FOUND", "message": "课程不存在"},
         )
+    await _rollback_course_auto_charge(db, course)
     await db.delete(course)
     await db.commit()
 
@@ -648,7 +1018,14 @@ async def update_course_status(
             detail={"code": "COURSE_NOT_FOUND", "message": "课程不存在"},
         )
     course, student_name = row
+    old_status = course.status
     course.status = data.status
+
+    if data.status == "completed":
+        await _ensure_course_auto_charge(db, course)
+    elif data.status == "cancelled" and old_status == "completed":
+        await _rollback_course_auto_charge(db, course)
+
     await db.commit()
     await db.refresh(course)
 

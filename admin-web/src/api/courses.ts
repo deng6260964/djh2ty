@@ -9,6 +9,10 @@ import type {
   CopyWeekPreviewRequest,
   CopyWeekPreviewResponse,
   CopyWeekConfirmResponse,
+  CourseCompleteFormData,
+  CourseCompleteResponse,
+  CourseDetailV2,
+  MakeupPoolResponse,
 } from '../types/models'
 import type { PaginatedResponse } from '../types/api'
 
@@ -48,6 +52,31 @@ export const coursesApi = {
 
   updateStatus: async (id: number, status: string): Promise<Course> => {
     const response = await client.patch<Course>(`/api/courses/${id}/status`, { status })
+    return response.data
+  },
+
+  getDetailV2: async (id: number): Promise<CourseDetailV2> => {
+    const response = await client.get<CourseDetailV2>(`/api/courses/${id}/detail-v2`)
+    return response.data
+  },
+
+  complete: async (id: number, data: CourseCompleteFormData): Promise<CourseCompleteResponse> => {
+    const response = await client.post<CourseCompleteResponse>(`/api/courses/${id}/complete`, data)
+    return response.data
+  },
+
+  leave: async (id: number, data: { leave_type: 'student' | 'teacher'; reason?: string; turn_to_makeup: boolean }): Promise<Course> => {
+    const response = await client.post<Course>(`/api/courses/${id}/leave`, data)
+    return response.data
+  },
+
+  getMakeupPool: async (): Promise<MakeupPoolResponse> => {
+    const response = await client.get<MakeupPoolResponse>('/api/courses/makeup-pool')
+    return response.data
+  },
+
+  scheduleMakeup: async (id: number, data: { start_time: string; end_time: string; notes?: string }): Promise<Course> => {
+    const response = await client.post<Course>(`/api/courses/${id}/makeup`, data)
     return response.data
   },
 

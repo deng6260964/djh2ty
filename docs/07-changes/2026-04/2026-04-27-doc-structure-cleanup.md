@@ -15,7 +15,7 @@
 - 将当前产品、设计、架构、实现文档迁移到 `docs/01-product/`、`docs/02-design/`、`docs/03-architecture/`、`docs/04-implementation/`。
 - 将过时文档归档到 `docs/99-archive/`。
 - 新增 `docs/00-index.md`、`docs/01-product/current.md`、`docs/04-implementation/documentation-workflow.md`、`docs/04-implementation/doc-map.md`。
-- 新增 `docs/06-changes/` 用于记录后续变更。
+- 新增 `docs/07-changes/` 用于记录后续变更。
 
 ## 影响范围
 

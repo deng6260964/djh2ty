@@ -2,8 +2,18 @@ import React, { useEffect, useState } from 'react'
 import { Alert, Descriptions, Drawer, Row, Col, Spin, Statistic, Table, Tabs, Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { studentsApi } from '../../api/students'
-import type { Student, StudentAccount } from '../../types/models'
-import { formatDate, formatDateTime, formatMoney, getCourseStatusLabel, getCourseStatusColor } from '../../utils/format'
+import { feedbackApi } from '../../api/feedback'
+import { progressApi } from '../../api/progress'
+import type { Feedback, Grade, KnowledgePoint, Student, StudentAccount } from '../../types/models'
+import {
+  formatDate,
+  formatDateTime,
+  formatMoney,
+  getCourseStatusLabel,
+  getCourseStatusColor,
+  getKnowledgeStatusColor,
+  getKnowledgeStatusLabel,
+} from '../../utils/format'
 
 const { Text } = Typography
 
@@ -36,6 +46,9 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ studentId, open, onClose,
   const [courses, setCourses] = useState<CourseHistory[]>([])
   const [assignments, setAssignments] = useState<AssignmentRecord[]>([])
   const [account, setAccount] = useState<StudentAccount | null>(null)
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([])
+  const [grades, setGrades] = useState<Grade[]>([])
+  const [knowledgePoints, setKnowledgePoints] = useState<KnowledgePoint[]>([])
   const [activeTab, setActiveTab] = useState('info')
 
   useEffect(() => {
@@ -47,17 +60,23 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ studentId, open, onClose,
   const fetchStudentData = async (id: number) => {
     setLoading(true)
     try {
-      const [studentData, coursesData, assignmentsData, accountData] = await Promise.allSettled([
+      const [studentData, coursesData, assignmentsData, accountData, feedbackData, gradeData, knowledgeData] = await Promise.allSettled([
         studentsApi.get(id),
         studentsApi.getCourses(id, { page_size: 20 }),
         studentsApi.getAssignments(id, { page_size: 20 }),
         studentsApi.getAccount(id),
+        feedbackApi.list({ student_id: id, page_size: 20 }),
+        progressApi.listGrades({ student_id: id, page_size: 20 }),
+        progressApi.listKnowledgePoints({ student_id: id }),
       ])
 
       if (studentData.status === 'fulfilled') setStudent(studentData.value)
       if (coursesData.status === 'fulfilled') setCourses(coursesData.value?.items || [])
       if (assignmentsData.status === 'fulfilled') setAssignments(assignmentsData.value?.items || [])
       if (accountData.status === 'fulfilled') setAccount(accountData.value)
+      if (feedbackData.status === 'fulfilled') setFeedbacks(feedbackData.value.items || [])
+      if (gradeData.status === 'fulfilled') setGrades(gradeData.value.items || [])
+      if (knowledgeData.status === 'fulfilled') setKnowledgePoints(knowledgeData.value || [])
     } catch {
       // ignore
     } finally {
@@ -119,6 +138,78 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ studentId, open, onClose,
         const labelMap: Record<string, string> = { pending: '待提交', submitted: '待批改', graded: '已批改' }
         return <Tag color={colorMap[v] || 'default'}>{labelMap[v] || v}</Tag>
       },
+    },
+  ]
+
+  const feedbackColumns: ColumnsType<Feedback> = [
+    {
+      title: '日期',
+      dataIndex: 'created_at',
+      width: 110,
+      render: (v: string) => formatDate(v),
+    },
+    {
+      title: '课堂表现',
+      dataIndex: 'performance',
+      ellipsis: true,
+    },
+    {
+      title: '下节计划',
+      dataIndex: 'next_plan',
+      ellipsis: true,
+      render: (v: string) => v || '-',
+    },
+    {
+      title: '推送',
+      dataIndex: 'is_pushed',
+      width: 70,
+      render: (v: boolean) => <Tag color={v ? 'green' : 'orange'}>{v ? '已推送' : '未推送'}</Tag>,
+    },
+  ]
+
+  const gradeColumns: ColumnsType<Grade> = [
+    {
+      title: '日期',
+      dataIndex: 'exam_date',
+      width: 100,
+      render: (v: string) => formatDate(v),
+    },
+    {
+      title: '科目',
+      dataIndex: 'subject',
+      width: 80,
+    },
+    {
+      title: '考试',
+      dataIndex: 'exam_name',
+      ellipsis: true,
+      render: (v: string) => v || '-',
+    },
+    {
+      title: '得分',
+      width: 90,
+      render: (_: unknown, record: Grade) => `${record.score}/${record.full_score}`,
+    },
+  ]
+
+  const knowledgeColumns: ColumnsType<KnowledgePoint> = [
+    {
+      title: '知识点',
+      dataIndex: 'point_name',
+      ellipsis: true,
+    },
+    {
+      title: '科目',
+      dataIndex: 'subject',
+      width: 80,
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      width: 90,
+      render: (v: string) => (
+        <Tag color={getKnowledgeStatusColor(v)}>{getKnowledgeStatusLabel(v)}</Tag>
+      ),
     },
   ]
 
@@ -332,6 +423,45 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ studentId, open, onClose,
           ) : (
             <Text type="secondary">暂无账户数据</Text>
           )}
+        </div>
+      ),
+    },
+    {
+      key: 'feedback',
+      label: '课后反馈',
+      children: (
+        <Table
+          columns={feedbackColumns}
+          dataSource={feedbacks}
+          rowKey="id"
+          size="small"
+          pagination={{ pageSize: 10, size: 'small' }}
+          locale={{ emptyText: '暂无课后反馈' }}
+        />
+      ),
+    },
+    {
+      key: 'progress',
+      label: '学习复盘',
+      children: (
+        <div>
+          <Table
+            columns={gradeColumns}
+            dataSource={grades}
+            rowKey="id"
+            size="small"
+            pagination={{ pageSize: 8, size: 'small' }}
+            locale={{ emptyText: '暂无成绩记录' }}
+            style={{ marginBottom: 16 }}
+          />
+          <Table
+            columns={knowledgeColumns}
+            dataSource={knowledgePoints}
+            rowKey="id"
+            size="small"
+            pagination={{ pageSize: 8, size: 'small' }}
+            locale={{ emptyText: '暂无知识点记录' }}
+          />
         </div>
       ),
     },

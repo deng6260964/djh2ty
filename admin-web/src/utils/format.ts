@@ -71,6 +71,9 @@ export const getCourseStatusLabel = (status: string): string => {
     scheduled: '待上课',
     completed: '已完成',
     cancelled: '已取消',
+    student_leave_pending_makeup: '学生请假待补',
+    teacher_leave_pending_makeup: '老师请假待补',
+    makeup_scheduled: '已安排补课',
   }
   return map[status] || status
 }
@@ -80,6 +83,9 @@ export const getCourseStatusColor = (status: string): string => {
     scheduled: 'blue',
     completed: 'green',
     cancelled: 'default',
+    student_leave_pending_makeup: 'orange',
+    teacher_leave_pending_makeup: 'gold',
+    makeup_scheduled: 'purple',
   }
   return map[status] || 'default'
 }

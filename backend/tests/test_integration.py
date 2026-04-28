@@ -3,7 +3,6 @@
 覆盖跨模块的端到端场景
 """
 import io
-import pytest
 from datetime import date, timedelta, datetime
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -339,10 +338,6 @@ class TestBillingWorkflow:
 class TestTeacherV2AccountCourseFlow:
     """老师端 V2：学生账户驱动课程运营的目标集成链路"""
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="V2 课程完成自动扣费尚未落地；当前状态接口只更新课程状态",
-    )
     async def test_complete_course_creates_charge_and_updates_account_balance(
         self,
         async_client: AsyncClient,
@@ -355,8 +350,7 @@ class TestTeacherV2AccountCourseFlow:
         3. 完成课程
         4. 自动生成扣费记录，并更新学生账户余额
 
-        该用例是评审后补充的 V2 契约测试，当前以 strict xfail 标记。
-        后续实现自动扣费后，应移除 xfail 并保留精确金额断言。
+        该用例是评审后补充的 V2 契约测试，要求完成课程时真实生成扣费记录。
         """
         await async_client.put(
             "/api/billing/subject-prices/数学",
@@ -421,6 +415,351 @@ class TestTeacherV2AccountCourseFlow:
         assert len(account["recent_charges"]) == 1
         assert account["recent_charges"][0]["course_id"] == course_id
         assert account["recent_charges"][0]["amount"] == 180.0
+
+    async def test_completed_course_charge_is_idempotent_and_cancel_rolls_back(
+        self,
+        async_client: AsyncClient,
+        auth_headers: dict,
+    ):
+        """完成课程只扣一次；已扣费课程取消后应回滚自动扣费记录"""
+        await async_client.put(
+            "/api/billing/subject-prices/数学",
+            json={"price_per_hour": 100.0},
+            headers=auth_headers,
+        )
+        student_resp = await async_client.post(
+            "/api/students",
+            json={
+                "name": "V2取消回滚学生",
+                "grade": "初二",
+                "subjects": ["数学"],
+                "parent_phone": "13000000903",
+            },
+            headers=auth_headers,
+        )
+        assert student_resp.status_code == 201, student_resp.text
+        student_id = student_resp.json()["id"]
+
+        recharge_resp = await async_client.post(
+            "/api/billing/recharge",
+            json={
+                "student_id": student_id,
+                "paid_amount": 300.0,
+                "payment_method": "wechat",
+                "notes": "预收充值",
+            },
+            headers=auth_headers,
+        )
+        assert recharge_resp.status_code == 201, recharge_resp.text
+
+        start_time = datetime.now().replace(hour=14, minute=0, second=0, microsecond=0)
+        course_resp = await async_client.post(
+            "/api/courses",
+            json={
+                "student_id": student_id,
+                "subject": "数学",
+                "start_time": start_time.isoformat(),
+                "end_time": (start_time + timedelta(minutes=90)).isoformat(),
+            },
+            headers=auth_headers,
+        )
+        assert course_resp.status_code == 201, course_resp.text
+        course_id = course_resp.json()["id"]
+
+        for _ in range(2):
+            complete_resp = await async_client.patch(
+                f"/api/courses/{course_id}/status",
+                json={"status": "completed"},
+                headers=auth_headers,
+            )
+            assert complete_resp.status_code == 200, complete_resp.text
+
+        account_after_complete_resp = await async_client.get(
+            f"/api/billing/students/{student_id}/account",
+            headers=auth_headers,
+        )
+        assert account_after_complete_resp.status_code == 200, account_after_complete_resp.text
+        account_after_complete = account_after_complete_resp.json()
+        assert account_after_complete["current_balance"] == 150.0
+        assert account_after_complete["total_charged"] == 150.0
+        course_charges = [
+            charge
+            for charge in account_after_complete["recent_charges"]
+            if charge["course_id"] == course_id
+        ]
+        assert len(course_charges) == 1
+
+        cancel_resp = await async_client.patch(
+            f"/api/courses/{course_id}/status",
+            json={"status": "cancelled"},
+            headers=auth_headers,
+        )
+        assert cancel_resp.status_code == 200, cancel_resp.text
+
+        account_after_cancel_resp = await async_client.get(
+            f"/api/billing/students/{student_id}/account",
+            headers=auth_headers,
+        )
+        assert account_after_cancel_resp.status_code == 200, account_after_cancel_resp.text
+        account_after_cancel = account_after_cancel_resp.json()
+        assert account_after_cancel["current_balance"] == 300.0
+        assert account_after_cancel["total_charged"] == 0.0
+        assert all(
+            charge["course_id"] != course_id
+            for charge in account_after_cancel["recent_charges"]
+        )
+
+    async def test_delete_completed_course_rolls_back_auto_charge(
+        self,
+        async_client: AsyncClient,
+        auth_headers: dict,
+    ):
+        """删除已自动扣费课程时，也应回滚对应扣费记录"""
+        await async_client.put(
+            "/api/billing/subject-prices/数学",
+            json={"price_per_hour": 100.0},
+            headers=auth_headers,
+        )
+        student_resp = await async_client.post(
+            "/api/students",
+            json={
+                "name": "V2删除回滚学生",
+                "grade": "初三",
+                "subjects": ["数学"],
+                "parent_phone": "13000000904",
+            },
+            headers=auth_headers,
+        )
+        assert student_resp.status_code == 201, student_resp.text
+        student_id = student_resp.json()["id"]
+
+        recharge_resp = await async_client.post(
+            "/api/billing/recharge",
+            json={
+                "student_id": student_id,
+                "paid_amount": 300.0,
+                "payment_method": "wechat",
+            },
+            headers=auth_headers,
+        )
+        assert recharge_resp.status_code == 201, recharge_resp.text
+
+        start_time = datetime.now().replace(hour=16, minute=0, second=0, microsecond=0)
+        course_resp = await async_client.post(
+            "/api/courses",
+            json={
+                "student_id": student_id,
+                "subject": "数学",
+                "start_time": start_time.isoformat(),
+                "end_time": (start_time + timedelta(minutes=60)).isoformat(),
+            },
+            headers=auth_headers,
+        )
+        assert course_resp.status_code == 201, course_resp.text
+        course_id = course_resp.json()["id"]
+
+        complete_resp = await async_client.patch(
+            f"/api/courses/{course_id}/status",
+            json={"status": "completed"},
+            headers=auth_headers,
+        )
+        assert complete_resp.status_code == 200, complete_resp.text
+
+        delete_resp = await async_client.delete(
+            f"/api/courses/{course_id}",
+            headers=auth_headers,
+        )
+        assert delete_resp.status_code == 204, delete_resp.text
+
+        account_resp = await async_client.get(
+            f"/api/billing/students/{student_id}/account",
+            headers=auth_headers,
+        )
+        assert account_resp.status_code == 200, account_resp.text
+        account = account_resp.json()
+        assert account["current_balance"] == 300.0
+        assert account["total_charged"] == 0.0
+        assert all(
+            charge["course_id"] != course_id
+            for charge in account["recent_charges"]
+        )
+
+    async def test_course_detail_v2_and_complete_create_feedback_assignment_and_charge(
+        self,
+        async_client: AsyncClient,
+        auth_headers: dict,
+    ):
+        """课程详情闭环：详情聚合、课后记录、可选作业、完成扣费一次完成"""
+        await async_client.put(
+            "/api/billing/subject-prices/英语",
+            json={"price_per_hour": 120.0},
+            headers=auth_headers,
+        )
+        student_resp = await async_client.post(
+            "/api/students",
+            json={
+                "name": "V2课程详情学生",
+                "grade": "初一",
+                "subjects": ["英语"],
+                "parent_phone": "13000000905",
+            },
+            headers=auth_headers,
+        )
+        assert student_resp.status_code == 201, student_resp.text
+        student_id = student_resp.json()["id"]
+
+        await async_client.post(
+            "/api/billing/recharge",
+            json={
+                "student_id": student_id,
+                "paid_amount": 300.0,
+                "payment_method": "wechat",
+            },
+            headers=auth_headers,
+        )
+
+        course_resp = await async_client.post(
+            "/api/courses",
+            json={
+                "student_id": student_id,
+                "subject": "英语",
+                "start_time": "2026-05-12T18:00:00",
+                "end_time": "2026-05-12T19:30:00",
+            },
+            headers=auth_headers,
+        )
+        assert course_resp.status_code == 201, course_resp.text
+        course_id = course_resp.json()["id"]
+
+        detail_resp = await async_client.get(
+            f"/api/courses/{course_id}/detail-v2",
+            headers=auth_headers,
+        )
+        assert detail_resp.status_code == 200, detail_resp.text
+        detail = detail_resp.json()
+        assert detail["course"]["id"] == course_id
+        assert detail["account"]["current_balance"] == 300.0
+        assert detail["projected_charge"] == 180.0
+
+        complete_resp = await async_client.post(
+            f"/api/courses/{course_id}/complete",
+            json={
+                "performance": "课堂参与积极，能主动复述重点句型",
+                "knowledge_mastery": "一般过去时掌握较稳定",
+                "problems": "阅读长句速度偏慢",
+                "next_plan": "下节课继续训练阅读分层理解",
+                "rating": 4,
+                "assignment": {
+                    "enabled": True,
+                    "title": "一般过去时巩固",
+                    "content": "完成讲义第 3 页练习",
+                    "due_date": "2026-05-14",
+                },
+            },
+            headers=auth_headers,
+        )
+        assert complete_resp.status_code == 200, complete_resp.text
+        completed = complete_resp.json()
+        assert completed["course_status"] == "completed"
+        assert completed["charge_amount"] == 180.0
+        assert completed["balance_before"] == 300.0
+        assert completed["balance_after"] == 120.0
+        assert completed["feedback_id"] is not None
+        assert completed["assignment_id"] is not None
+
+        account_resp = await async_client.get(
+            f"/api/billing/students/{student_id}/account",
+            headers=auth_headers,
+        )
+        assert account_resp.status_code == 200, account_resp.text
+        account = account_resp.json()
+        assert account["current_balance"] == 120.0
+        assert account["recent_charges"][0]["course_id"] == course_id
+
+        feedback_resp = await async_client.get(
+            f"/api/feedback/{completed['feedback_id']}",
+            headers=auth_headers,
+        )
+        assert feedback_resp.status_code == 200, feedback_resp.text
+        assert feedback_resp.json()["course_id"] == course_id
+
+        assignment_resp = await async_client.get(
+            f"/api/assignments/{completed['assignment_id']}",
+            headers=auth_headers,
+        )
+        assert assignment_resp.status_code == 200, assignment_resp.text
+        assert assignment_resp.json()["students"][0]["student_id"] == student_id
+
+    async def test_leave_course_enters_makeup_pool_and_makeup_creates_new_course(
+        self,
+        async_client: AsyncClient,
+        auth_headers: dict,
+    ):
+        """学生/老师请假进入待补课池，安排补课后创建新课程并关闭原待补项"""
+        student_resp = await async_client.post(
+            "/api/students",
+            json={
+                "name": "V2待补课学生",
+                "grade": "初二",
+                "subjects": ["数学"],
+                "parent_phone": "13000000906",
+            },
+            headers=auth_headers,
+        )
+        assert student_resp.status_code == 201, student_resp.text
+        student_id = student_resp.json()["id"]
+
+        course_resp = await async_client.post(
+            "/api/courses",
+            json={
+                "student_id": student_id,
+                "subject": "数学",
+                "start_time": "2026-05-13T19:00:00",
+                "end_time": "2026-05-13T20:30:00",
+            },
+            headers=auth_headers,
+        )
+        assert course_resp.status_code == 201, course_resp.text
+        course_id = course_resp.json()["id"]
+
+        leave_resp = await async_client.post(
+            f"/api/courses/{course_id}/leave",
+            json={
+                "leave_type": "student",
+                "reason": "学生临时生病",
+                "turn_to_makeup": True,
+            },
+            headers=auth_headers,
+        )
+        assert leave_resp.status_code == 200, leave_resp.text
+        assert leave_resp.json()["status"] == "student_leave_pending_makeup"
+
+        pool_resp = await async_client.get("/api/courses/makeup-pool", headers=auth_headers)
+        assert pool_resp.status_code == 200, pool_resp.text
+        pool_items = pool_resp.json()["items"]
+        assert any(item["id"] == course_id for item in pool_items)
+
+        makeup_resp = await async_client.post(
+            f"/api/courses/{course_id}/makeup",
+            json={
+                "start_time": "2026-05-15T19:00:00",
+                "end_time": "2026-05-15T20:30:00",
+                "notes": "补上 5 月 13 日请假课程",
+            },
+            headers=auth_headers,
+        )
+        assert makeup_resp.status_code == 201, makeup_resp.text
+        makeup_course = makeup_resp.json()
+        assert makeup_course["student_id"] == student_id
+        assert makeup_course["status"] == "scheduled"
+
+        pool_after_resp = await async_client.get("/api/courses/makeup-pool", headers=auth_headers)
+        assert pool_after_resp.status_code == 200, pool_after_resp.text
+        assert all(item["id"] != course_id for item in pool_after_resp.json()["items"])
+
+        original_resp = await async_client.get(f"/api/courses/{course_id}", headers=auth_headers)
+        assert original_resp.status_code == 200, original_resp.text
+        assert original_resp.json()["status"] == "makeup_scheduled"
 
 
 class TestStudentDetailWorkflow:

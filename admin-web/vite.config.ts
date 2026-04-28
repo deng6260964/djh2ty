@@ -9,9 +9,6 @@ export default defineConfig({
         manualChunks(id) {
           if (!id.includes('node_modules')) return
 
-          if (id.includes('/antd/') || id.includes('/@ant-design/')) {
-            return 'antd'
-          }
           if (id.includes('/recharts/')) {
             return 'charts'
           }

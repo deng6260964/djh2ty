@@ -27,7 +27,8 @@
 | `docs/00-index.md` | 当前 | 全项目 | 项目文档总入口 |
 | `docs/04-implementation/documentation-workflow.md` | 当前 | 全项目 | 文档归集、检索顺序和 vibecoding 交接流程 |
 | `docs/04-implementation/doc-map.md` | 当前 | 全项目 | 项目自有 Markdown 文档完整地图 |
-| `docs/06-changes/README.md` | 当前 | 全项目 | 变更记录目录说明 |
+| `docs/07-changes/README.md` | 当前 | 全项目 | 变更记录目录说明 |
+| `README.md` | 当前 | 全项目 | 仓库说明和文档入口提示 |
 | `AGENTS.md` | 当前 | 全项目 | Agent 使用的仓库工作规则 |
 | `CLAUDE.md` | 当前 | 全项目 | Claude Code 使用的仓库工作规则 |
 
@@ -62,25 +63,31 @@
 | 文档 | 状态 | 范围 | 用途 |
 | --- | --- | --- | --- |
 | `docs/04-implementation/backend/README.md` | 参考 | 后端 | 后端启动和开发参考 |
-| `docs/04-implementation/backend/test-report.md` | 参考 | 后端 | 后端测试覆盖快照 |
-| `docs/04-implementation/admin-web/browser-use/README.md` | 当前 | 管理端 | browser-use 集成测试目录入口 |
-| `docs/04-implementation/admin-web/browser-use/dashboard-workbench.spec.md` | 当前 | 管理端 | 老师工作台专项集成测试用例 |
-| `docs/04-implementation/admin-web/browser-use/full-regression.spec.md` | 当前 | 管理端 | 老师端 V2 全量回归测试用例 |
-| `docs/04-implementation/admin-web/browser-use/dashboard-workbench.verification.md` | 参考 | 管理端 | 工作台验证记录快照 |
-| `docs/04-implementation/admin-web/browser-use/full-regression.verification.md` | 参考 | 管理端 | 全量回归验证记录快照 |
+| `docs/04-implementation/documentation-retrospective-2026-04-27.md` | 当前 | 全项目 | 当前文档结构复盘 |
+| `docs/05-testing/README.md` | 当前 | 全项目 | 测试文档统一入口 |
+| `docs/05-testing/backend/test-report.md` | 参考 | 后端 | 后端测试覆盖快照 |
+| `docs/05-testing/browser-use/README.md` | 当前 | 管理端 | browser-use 集成测试目录入口 |
+| `docs/05-testing/browser-use/dashboard-workbench.spec.md` | 当前 | 管理端 | 老师工作台专项集成测试用例 |
+| `docs/05-testing/browser-use/full-regression.spec.md` | 当前 | 管理端 | 老师端 V2 全量回归测试用例 |
+| `docs/05-testing/browser-use/dashboard-workbench.verification.md` | 参考 | 管理端 | 工作台验证记录快照 |
+| `docs/05-testing/browser-use/full-regression.verification.md` | 参考 | 管理端 | 全量回归验证记录快照 |
 
 ## 变更记录
 
 | 文档 | 状态 | 范围 | 用途 |
 | --- | --- | --- | --- |
-| `docs/06-changes/template/change-record-template.md` | 参考 | 全项目 | 变更记录模板 |
-| `docs/06-changes/2026-04/2026-04-27-doc-structure-cleanup.md` | 当前 | 全项目 | 文档结构清理与归档变更记录 |
+| `docs/07-changes/template/change-record-template.md` | 参考 | 全项目 | 变更记录模板 |
+| `docs/07-changes/2026-04/2026-04-27-doc-structure-cleanup.md` | 当前 | 全项目 | 文档结构清理与归档变更记录 |
+| `docs/07-changes/2026-04/2026-04-27-testing-docs-folder.md` | 当前 | 文档、测试 | 测试文档目录归集变更记录 |
+| `docs/07-changes/2026-04/2026-04-27-teacher-v2-auto-charge.md` | 当前 | 老师端 V2 | 完成课程自动扣费与取消回滚变更记录 |
+| `docs/07-changes/2026-04/2026-04-27-teacher-v2-main-closure.md` | 当前 | 老师端 V2 | 课程详情、待补课池、学生详情复盘和拆包收口记录 |
+| `docs/07-changes/2026-04/2026-04-27-doc-structure-retrospective.md` | 当前 | 全项目 | 文档结构复盘整理记录 |
 
 ## 原始 AI 历史
 
 | 位置 | 状态 | 范围 | 用途 |
 | --- | --- | --- | --- |
-| `.specstory/` | 原始参考 | 全项目 | 原始 AI 会话历史；重要决策需提炼到当前文档或 `docs/05-ai-worklogs/` |
+| `.specstory/` | 原始参考 | 全项目 | 原始 AI 会话历史；重要决策需提炼到当前文档或 `docs/06-ai-worklogs/` |
 
 ## 归档材料
 

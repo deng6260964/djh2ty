@@ -47,10 +47,74 @@ export interface Course {
   start_time: string
   end_time: string
   duration: number
-  status: 'scheduled' | 'completed' | 'cancelled'
+  status: 'scheduled' | 'completed' | 'cancelled' | 'student_leave_pending_makeup' | 'teacher_leave_pending_makeup' | 'makeup_scheduled'
   location?: string
   hourly_rate?: number
   notes?: string
+}
+
+export interface CourseDetailV2 {
+  course: Course
+  student: {
+    id: number
+    name: string
+    grade: string
+    subjects: string[]
+    parent_name?: string
+    parent_phone?: string
+  }
+  account: {
+    current_balance: number
+    projected_charge: number
+    needs_payment: boolean
+  }
+  projected_charge: number
+  recent_feedback: Array<{
+    id: number
+    course_id?: number | null
+    performance: string
+    problems?: string | null
+    next_plan?: string | null
+    rating?: number | null
+    created_at: string
+  }>
+  recent_assignments: Array<{
+    id: number
+    title: string
+    subject: string
+    due_date: string
+    status: string
+    score?: number | null
+  }>
+}
+
+export interface CourseCompleteFormData {
+  performance: string
+  knowledge_mastery?: string
+  problems?: string
+  next_plan?: string
+  rating?: number
+  assignment?: {
+    enabled: boolean
+    title?: string
+    content?: string
+    due_date?: string
+  }
+}
+
+export interface CourseCompleteResponse {
+  course_status: string
+  charge_amount: number
+  balance_before: number
+  balance_after: number
+  payment_alert_triggered: boolean
+  feedback_id?: number | null
+  assignment_id?: number | null
+}
+
+export interface MakeupPoolResponse {
+  items: Course[]
+  total: number
 }
 
 export interface CourseFormData {

@@ -6,7 +6,7 @@ from sqlalchemy import select, func, and_, or_
 from app.database import get_db
 from app.models.student import Student
 from app.models.course import Course
-from app.models.assignment import AssignmentStudent
+from app.models.assignment import Assignment, AssignmentStudent
 from app.models.billing import BillingRecord
 from app.schemas.student import (
     StudentCreate, StudentUpdate, StudentResponse,
@@ -372,6 +372,59 @@ async def get_student_courses(
         page_size=page_size,
         pages=pages,
     )
+
+
+@router.get("/{student_id}/assignments")
+async def get_student_assignments(
+    student_id: int,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
+    current_user: User = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """某学生的作业记录，用于学生详情抽屉"""
+    student_result = await db.execute(
+        select(Student).where(Student.id == student_id)
+    )
+    if not student_result.scalar_one_or_none():
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "STUDENT_NOT_FOUND", "message": "学生不存在"},
+        )
+
+    query = (
+        select(Assignment, AssignmentStudent)
+        .join(AssignmentStudent, AssignmentStudent.assignment_id == Assignment.id)
+        .where(AssignmentStudent.student_id == student_id)
+    )
+    count_result = await db.execute(
+        select(func.count()).select_from(query.subquery())
+    )
+    total = count_result.scalar_one()
+    offset = (page - 1) * page_size
+    result = await db.execute(
+        query.order_by(Assignment.due_date.desc()).offset(offset).limit(page_size)
+    )
+    rows = result.all()
+
+    items = [
+        {
+            "id": assignment.id,
+            "title": assignment.title,
+            "due_date": assignment.due_date,
+            "status": assignment_student.status,
+            "score": assignment_student.score,
+        }
+        for assignment, assignment_student in rows
+    ]
+
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "pages": (total + page_size - 1) // page_size,
+    }
 
 
 @router.get("/{student_id}/billing-summary")

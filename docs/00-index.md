@@ -10,7 +10,7 @@
 
 - `docs/04-implementation/documentation-workflow.md` — 文档归集规则、检索顺序、vibecoding 工作流和交接清单
 - `docs/04-implementation/doc-map.md` — 项目自有 Markdown 文档地图，列出每份文档的状态和用途
-- `docs/06-changes/README.md` — 变更记录目录说明
+- `docs/07-changes/README.md` — 变更记录目录说明
 
 ## 当前活跃基线
 
@@ -31,8 +31,9 @@ docs/
   02-design/
   03-architecture/
   04-implementation/
-  05-ai-worklogs/
-  06-changes/
+  05-testing/
+  06-ai-worklogs/
+  07-changes/
   99-archive/
 ```
 
@@ -51,8 +52,8 @@ docs/
 
 ## AI 会话记录
 
-`.specstory/` 是原始 AI 会话历史。重要决策、进度变化和后续任务不能只留在原始对话里，应归纳到当前文档；如果不适合放入产品、设计、实现或架构文档，可归档到 `docs/05-ai-worklogs/`。
+`.specstory/` 是原始 AI 会话历史。重要决策、进度变化和后续任务不能只留在原始对话里，应归纳到当前文档；如果不适合放入产品、设计、实现或架构文档，可归档到 `docs/06-ai-worklogs/`。
 
 ## 变更记录
 
-已经确认或完成的重要变更，应记录到 `docs/06-changes/`。变更记录用于说明“改了什么、为什么改、影响哪里、如何验证”，方便多人并行开发时追溯上下文。
+已经确认或完成的重要变更，应记录到 `docs/07-changes/`。变更记录用于说明“改了什么、为什么改、影响哪里、如何验证”，方便多人并行开发时追溯上下文。
