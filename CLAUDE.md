@@ -88,7 +88,7 @@ checkpoint 生成后，应根据当前对话补齐本次目标、已完成、未
 
 ### 启动数据库
 ```bash
-docker-compose up -d        # 启动 PostgreSQL（localhost:5432）
+docker-compose up -d        # 使用 postgres:16-alpine 启动 PostgreSQL（localhost:5432）
 docker-compose down         # 停止
 ```
 

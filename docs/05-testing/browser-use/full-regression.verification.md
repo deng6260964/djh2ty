@@ -57,6 +57,14 @@
 - 管理端构建：`cd admin-web && npm run build`，通过；仍有 Vite CJS Node API deprecation warning。
 - 学生端构建：`cd student-web && npm run build`，通过；仍有单 chunk 超过 500 kB 的 Vite 体积警告。
 
+### 2026-04-28 追加收敛复核
+
+- 本地数据库：`postgres:16-alpine` 容器 `tutoring-db`，`localhost:5432`。
+- 后端健康检查：`GET /api/health` 通过。
+- 管理端 P0 页面级复核：通过，覆盖工作台、学生、课程、收费与账户、作业、反馈、学习复盘、资料、设置。
+- 学生端 V2 冒烟：通过，详见 `docs/05-testing/browser-use/student-web-smoke.verification.md`。
+- 发现并修复：学生端登录成功后仍跳转旧入口 `/courses`，已改为跳转新版首页 `/`。
+
 ### browser-use 非破坏性回归
 
 - `BU-AUTH-001` 未登录访问 `/dashboard` 自动跳转 `/login`：通过。

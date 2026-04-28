@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
+  HomeOutlined,
   CalendarOutlined,
   FormOutlined,
   MessageOutlined,
@@ -10,6 +11,7 @@ import {
 import '../styles/tabbar.css'
 
 const tabs = [
+  { path: '/', label: '首页', icon: <HomeOutlined /> },
   { path: '/courses', label: '课程', icon: <CalendarOutlined /> },
   { path: '/assignments', label: '作业', icon: <FormOutlined /> },
   { path: '/feedback', label: '反馈', icon: <MessageOutlined /> },
@@ -26,7 +28,7 @@ const TabBar: React.FC = () => {
       {tabs.map((tab) => (
         <div
           key={tab.path}
-          className={`tabbar-item ${location.pathname === tab.path ? 'active' : ''}`}
+          className={`tabbar-item ${location.pathname === tab.path || (tab.path === '/' && location.pathname === '') ? 'active' : ''}`}
           onClick={() => navigate(tab.path)}
         >
           {tab.icon}

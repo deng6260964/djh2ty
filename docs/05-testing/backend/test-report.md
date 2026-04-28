@@ -9,6 +9,7 @@
 
 | 时间 | 命令 | 结果 | 备注 |
 | --- | --- | --- | --- |
+| 2026-04-28 本轮 | `cd backend && pytest -q` | 121 passed in 45.44s | 新增学生端账户接口回归；出现 `pytest-asyncio` fixture loop scope deprecation warning，不影响本次结果 |
 | 2026-04-28 10:03 CST | `cd backend && pytest -q` | 120 passed in 42.50s | 出现 `pytest-asyncio` fixture loop scope deprecation warning，不影响本次结果 |
 
 ## 测试环境说明
@@ -34,11 +35,11 @@
 | 学生管理（students） | test_students.py | 18 |
 | 课程管理（courses） | test_courses.py | 23 |
 | 作业管理（assignments） | test_assignments.py | 13 |
-| 收费管理（billing） | test_billing.py | 16 |
+| 收费管理（billing） | test_billing.py | 17 |
 | 资料管理（resources） | test_resources.py | 19 |
 | 集成测试 | test_integration.py | 12 |
 | 老师端 V2 聚合接口 | test_teacher_workbench.py | 4 |
-| **合计** | **8 个文件** | **120 个用例** |
+| **合计** | **8 个文件** | **121 个用例** |
 
 ---
 
@@ -68,6 +69,7 @@
 | US-505 | 欠费提醒 | AC1:欠费学生有视觉标识（API层验证列表准确性） | 已覆盖 |
 | V2-WB | 老师工作台 | 今日课程、待补记录、待收费、待批改聚合及精确断言 | 已覆盖 |
 | V2-ACC | 学生预收账户 | 充值、余额、最近收款/扣费、收费提醒解除 | 已覆盖 |
+| V2-STUDENT-ACCOUNT | 学生端账户承接 | 学生/家长端只读查看当前余额、下一节课扣费风险、最近收款/扣费 | 已覆盖 |
 | V2-AUTO-CHARGE | 完成课程自动扣费 | 完成课程后生成扣费记录并更新余额；重复完成不重复扣费；已扣费课程取消或删除后回滚自动扣费 | 已覆盖 |
 | V2-COURSE-DETAIL | 课程详情闭环 | 详情聚合、课后记录、可选作业、保存并完成、自动扣费 | 已覆盖 |
 | V2-MAKEUP | 请假与待补课池 | 学生/老师请假转待补课池、安排补课、原课程移出待补池 | 已覆盖 |
@@ -133,6 +135,7 @@
 | /api/billing/records/{id} | DELETE | 正常删除 | test_billing.py |
 | /api/billing/recharge | POST | 预收充值增加学生账户余额 | test_billing.py |
 | /api/billing/students/{id}/account | GET | 当前余额、下一节课扣费风险、最近收款/扣费 | test_teacher_workbench.py |
+| /api/billing/my/account | GET | 当前登录学生只读查看余额、下一节课扣费风险、最近收款/扣费 | test_billing.py |
 | /api/billing/summary | GET | 应收/已收/欠费合计、按学生明细 | test_billing.py |
 | /api/billing/outstanding | GET | 欠费列表、已付清学生不出现 | test_billing.py |
 

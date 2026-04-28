@@ -22,7 +22,7 @@ const LoginPage: React.FC = () => {
         student_id: result.user.student_id,
       })
       message.success('登录成功')
-      navigate('/courses', { replace: true })
+      navigate('/', { replace: true })
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { detail?: { message?: string } } } }
       message.error(axiosError.response?.data?.detail?.message || '登录失败，请检查用户名和密码')

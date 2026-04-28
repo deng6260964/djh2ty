@@ -19,7 +19,7 @@ from app.schemas.account import (
     AccountPaymentRecord,
     StudentAccountResponse,
 )
-from app.dependencies import get_admin_user
+from app.dependencies import get_admin_user, get_current_student
 from app.models.user import User
 
 router = APIRouter(prefix="/billing", tags=["收费管理"])
@@ -34,6 +34,101 @@ async def _get_student_balance_context(db: AsyncSession, student_id: int):
     total_charged = round(sum(float(record.amount or 0) for record in records), 2)
     current_balance = round(total_received - total_charged, 2)
     return records, total_received, total_charged, current_balance
+
+
+async def _build_student_account_response(
+    db: AsyncSession,
+    student: Student,
+) -> StudentAccountResponse:
+    records, total_received, total_charged, current_balance = await _get_student_balance_context(db, student.id)
+
+    next_course_result = await db.execute(
+        select(Course)
+        .where(
+            Course.student_id == student.id,
+            Course.start_time > datetime.now(),
+            Course.status == "scheduled",
+        )
+        .order_by(Course.start_time.asc())
+        .limit(1)
+    )
+    next_course = next_course_result.scalar_one_or_none()
+
+    main_subject = student.subjects[0] if student.subjects else None
+    main_subject_hourly_rate = None
+    if main_subject:
+        price_result = await db.execute(
+            select(SubjectPrice).where(SubjectPrice.subject == main_subject)
+        )
+        price = price_result.scalar_one_or_none()
+        if price:
+            main_subject_hourly_rate = float(price.price_per_hour)
+
+    next_course_projected_charge = None
+    if next_course:
+        hourly_rate = float(next_course.hourly_rate or main_subject_hourly_rate or 0)
+        next_course_projected_charge = round(hourly_rate * ((next_course.duration or 0) / 60), 2)
+
+    estimated_lessons_left = 0.0
+    if main_subject_hourly_rate and main_subject_hourly_rate > 0:
+        estimated_lessons_left = round(current_balance / main_subject_hourly_rate, 1)
+
+    recent_payments = []
+    recent_charges = []
+    course_cache: dict[int, Course | None] = {}
+    for record in records:
+        if float(record.paid_amount or 0) > 0 and len(recent_payments) < 5:
+            recent_payments.append(
+                AccountPaymentRecord(
+                    record_id=record.id,
+                    amount=float(record.paid_amount or 0),
+                    paid_at=record.paid_at,
+                    payment_method=record.payment_method,
+                    notes=record.notes,
+                )
+            )
+        if float(record.amount or 0) > 0 and len(recent_charges) < 5:
+            subject = None
+            if record.course_id:
+                if record.course_id not in course_cache:
+                    course_result = await db.execute(
+                        select(Course).where(Course.id == record.course_id)
+                    )
+                    course_cache[record.course_id] = course_result.scalar_one_or_none()
+                course = course_cache[record.course_id]
+                if course:
+                    subject = course.subject
+            recent_charges.append(
+                AccountChargeRecord(
+                    record_id=record.id,
+                    course_id=record.course_id,
+                    subject=subject,
+                    amount=float(record.amount or 0),
+                    created_at=record.created_at,
+                    notes=record.notes,
+                )
+            )
+
+    return StudentAccountResponse(
+        student_id=student.id,
+        student_name=student.name,
+        grade=student.grade,
+        current_balance=current_balance,
+        total_received=total_received,
+        total_charged=total_charged,
+        estimated_lessons_left=estimated_lessons_left,
+        main_subject=main_subject,
+        main_subject_hourly_rate=main_subject_hourly_rate,
+        has_payment_alert=bool(
+            next_course_projected_charge is not None and current_balance < next_course_projected_charge
+        ),
+        next_course_id=next_course.id if next_course else None,
+        next_course_time=next_course.start_time if next_course else None,
+        next_course_subject=next_course.subject if next_course else None,
+        next_course_projected_charge=next_course_projected_charge,
+        recent_payments=recent_payments,
+        recent_charges=recent_charges,
+    )
 
 
 @router.get("/subject-prices", response_model=list[SubjectPriceResponse])
@@ -411,92 +506,13 @@ async def get_student_account(
             detail={"code": "STUDENT_NOT_FOUND", "message": "学生不存在"},
         )
 
-    records, total_received, total_charged, current_balance = await _get_student_balance_context(db, student_id)
+    return await _build_student_account_response(db, student)
 
-    next_course_result = await db.execute(
-        select(Course)
-        .where(
-            Course.student_id == student_id,
-            Course.start_time > datetime.now(),
-            Course.status == "scheduled",
-        )
-        .order_by(Course.start_time.asc())
-        .limit(1)
-    )
-    next_course = next_course_result.scalar_one_or_none()
 
-    main_subject = student.subjects[0] if student.subjects else None
-    main_subject_hourly_rate = None
-    if main_subject:
-        price_result = await db.execute(
-            select(SubjectPrice).where(SubjectPrice.subject == main_subject)
-        )
-        price = price_result.scalar_one_or_none()
-        if price:
-            main_subject_hourly_rate = float(price.price_per_hour)
-
-    next_course_projected_charge = None
-    if next_course:
-        hourly_rate = float(next_course.hourly_rate or main_subject_hourly_rate or 0)
-        next_course_projected_charge = round(hourly_rate * ((next_course.duration or 0) / 60), 2)
-
-    estimated_lessons_left = 0.0
-    if main_subject_hourly_rate and main_subject_hourly_rate > 0:
-        estimated_lessons_left = round(current_balance / main_subject_hourly_rate, 1)
-
-    recent_payments = []
-    recent_charges = []
-    course_cache: dict[int, Course | None] = {}
-    for record in records:
-        if float(record.paid_amount or 0) > 0 and len(recent_payments) < 5:
-            recent_payments.append(
-                AccountPaymentRecord(
-                    record_id=record.id,
-                    amount=float(record.paid_amount or 0),
-                    paid_at=record.paid_at,
-                    payment_method=record.payment_method,
-                    notes=record.notes,
-                )
-            )
-        if float(record.amount or 0) > 0 and len(recent_charges) < 5:
-            subject = None
-            if record.course_id:
-                if record.course_id not in course_cache:
-                    course_result = await db.execute(
-                        select(Course).where(Course.id == record.course_id)
-                    )
-                    course_cache[record.course_id] = course_result.scalar_one_or_none()
-                course = course_cache[record.course_id]
-                if course:
-                    subject = course.subject
-            recent_charges.append(
-                AccountChargeRecord(
-                    record_id=record.id,
-                    course_id=record.course_id,
-                    subject=subject,
-                    amount=float(record.amount or 0),
-                    created_at=record.created_at,
-                    notes=record.notes,
-                )
-            )
-
-    return StudentAccountResponse(
-        student_id=student.id,
-        student_name=student.name,
-        grade=student.grade,
-        current_balance=current_balance,
-        total_received=total_received,
-        total_charged=total_charged,
-        estimated_lessons_left=estimated_lessons_left,
-        main_subject=main_subject,
-        main_subject_hourly_rate=main_subject_hourly_rate,
-        has_payment_alert=bool(
-            next_course_projected_charge is not None and current_balance < next_course_projected_charge
-        ),
-        next_course_id=next_course.id if next_course else None,
-        next_course_time=next_course.start_time if next_course else None,
-        next_course_subject=next_course.subject if next_course else None,
-        next_course_projected_charge=next_course_projected_charge,
-        recent_payments=recent_payments,
-        recent_charges=recent_charges,
-    )
+@router.get("/my/account", response_model=StudentAccountResponse)
+async def get_my_student_account(
+    db: AsyncSession = Depends(get_db),
+    current_student: Student = Depends(get_current_student),
+):
+    """学生/家长端：当前学生账户余额与最近扣费，只读。"""
+    return await _build_student_account_response(db, current_student)

@@ -10,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.student import Student
 from app.models.billing import SubjectPrice, BillingRecord
 from app.models.course import Course
+from app.models.user import User
+from app.utils.auth import get_password_hash
 
 
 class TestSubjectPrices:
@@ -234,6 +236,81 @@ class TestBillingRecords:
         assert float(data["paid_amount"]) == 600.0
         assert data["status"] == "paid"
         assert data["student_id"] == test_student.id
+
+    async def test_my_account_returns_current_student_balance(
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        test_student: Student,
+        test_subject_price: SubjectPrice,
+    ):
+        """学生端账户接口只能读取当前登录学生的余额、扣费和下节课提醒。"""
+        student_user = User(
+            username="student_account",
+            hashed_password=get_password_hash("student123"),
+            role="student",
+            display_name=test_student.name,
+            is_active=True,
+        )
+        db.add(student_user)
+        await db.flush()
+        test_student.user_id = student_user.id
+
+        course = Course(
+            student_id=test_student.id,
+            subject="数学",
+            start_time=datetime(2026, 5, 6, 10, 0),
+            end_time=datetime(2026, 5, 6, 11, 30),
+            duration=90,
+            status="scheduled",
+            hourly_rate=150.0,
+        )
+        db.add(course)
+        await db.flush()
+
+        db.add(
+            BillingRecord(
+                student_id=test_student.id,
+                paid_amount=300.0,
+                amount=0.0,
+                status="paid",
+                payment_method="wechat",
+                notes="预收充值",
+            )
+        )
+        db.add(
+            BillingRecord(
+                student_id=test_student.id,
+                course_id=course.id,
+                paid_amount=0.0,
+                amount=150.0,
+                status="paid",
+                notes="课程完成自动扣费",
+            )
+        )
+        await db.flush()
+
+        login_resp = await async_client.post(
+            "/api/auth/login",
+            json={"username": "student_account", "password": "student123"},
+        )
+        assert login_resp.status_code == 200
+        headers = {"Authorization": f"Bearer {login_resp.json()['access_token']}"}
+
+        resp = await async_client.get("/api/billing/my/account", headers=headers)
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["student_id"] == test_student.id
+        assert data["student_name"] == test_student.name
+        assert data["current_balance"] == 150.0
+        assert data["total_received"] == 300.0
+        assert data["total_charged"] == 150.0
+        assert data["next_course_id"] == course.id
+        assert data["next_course_projected_charge"] == 225.0
+        assert data["has_payment_alert"] is True
+        assert len(data["recent_payments"]) == 1
+        assert len(data["recent_charges"]) == 1
 
 
 class TestBillingSummary:

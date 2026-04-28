@@ -60,7 +60,7 @@
 
 后端：
 
-- `docker-compose up -d`：启动本地 PostgreSQL
+- `docker-compose up -d`：使用 `postgres:16-alpine` 启动本地 PostgreSQL
 - `cd backend && pip install -r requirements.txt`：安装 FastAPI 和 pytest 依赖
 - `cd backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000`：启动 API，文档地址为 `http://localhost:8000/api/docs`
 - `cd backend && pytest`：运行完整后端测试

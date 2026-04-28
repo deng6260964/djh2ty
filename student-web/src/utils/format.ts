@@ -31,6 +31,11 @@ export const formatDuration = (minutes: number): string => {
   return `${hours}小时${mins}分钟`
 }
 
+export const formatCurrency = (amount: number | null | undefined): string => {
+  const value = Number(amount || 0)
+  return `¥${value.toFixed(2)}`
+}
+
 export const getCourseStatusLabel = (status: string): string => {
   const map: Record<string, string> = {
     scheduled: '待上课',

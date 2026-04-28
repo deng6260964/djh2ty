@@ -9,7 +9,7 @@
 - Python 3.11+
 - FastAPI 0.115
 - SQLAlchemy 2.x (异步模式)
-- PostgreSQL 15 (via Docker)
+- PostgreSQL 16 (via Docker)
 - JWT 鉴权
 
 ## 快速启动

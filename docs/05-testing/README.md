@@ -24,6 +24,7 @@
 | `browser-use/dashboard-workbench.verification.md` | 参考 | 工作台专项验证记录 |
 | `browser-use/full-regression.spec.md` | 当前 | 老师端 V2 全量回归测试用例 |
 | `browser-use/full-regression.verification.md` | 参考 | 全量回归验证记录 |
+| `browser-use/student-web-smoke.verification.md` | 参考 | 学生端 V2 浏览器冒烟验证记录 |
 
 ## 使用建议
 

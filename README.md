@@ -58,7 +58,7 @@
 docker-compose up -d
 ```
 
-默认会启动本地 PostgreSQL：
+默认会通过 `postgres:16-alpine` 镜像启动本地 PostgreSQL：
 
 - host：`localhost`
 - port：`5432`

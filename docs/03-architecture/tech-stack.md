@@ -22,7 +22,7 @@ graph TB
         end
 
         subgraph 数据层
-            PG["PostgreSQL 15<br/>Docker 容器<br/>端口 5432"]
+            PG["PostgreSQL 16<br/>Docker 容器<br/>端口 5432"]
             FS["本地文件系统<br/>/data/uploads/<br/>≤10GB"]
         end
 
@@ -176,7 +176,7 @@ backend/
 
 ## 4. 数据库选型
 
-### 选型结果：PostgreSQL 15（Docker 部署）
+### 选型结果：PostgreSQL 16（Docker 部署）
 
 ### 选型理由
 
@@ -199,7 +199,7 @@ backend/
 # docker-compose.yml
 services:
   postgres:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     container_name: tutoring_db
     environment:
       POSTGRES_DB: tutoring_assistant

@@ -77,6 +77,7 @@
 | `docs/05-testing/browser-use/full-regression.spec.md` | 当前 | 管理端 | 老师端 V2 全量回归测试用例 |
 | `docs/05-testing/browser-use/dashboard-workbench.verification.md` | 参考 | 管理端 | 工作台验证记录快照 |
 | `docs/05-testing/browser-use/full-regression.verification.md` | 参考 | 管理端 | 全量回归验证记录快照 |
+| `docs/05-testing/browser-use/student-web-smoke.verification.md` | 参考 | 学生端 | 学生端 V2 浏览器冒烟验证记录 |
 
 ## 进度同步
 
@@ -101,6 +102,8 @@
 | `docs/07-changes/2026-04/2026-04-28-progress-docs-folder.md` | 当前 | 文档、全项目 | 新增进度同步目录和并行工作流记录 |
 | `docs/07-changes/2026-04/2026-04-28-progress-checkpoint-workflow.md` | 当前 | 文档、全项目 | 新增断点快照流程和自动采集脚本记录 |
 | `docs/07-changes/2026-04/2026-04-28-development-usage-guide.md` | 当前 | 全项目 | AI 编码与文档治理 skill 沉淀及项目适配层引用记录 |
+| `docs/07-changes/2026-04/2026-04-28-student-web-code-splitting.md` | 当前 | 学生端 | 学生端路由懒加载与构建拆包记录 |
+| `docs/07-changes/2026-04/2026-04-28-student-web-v2-acceptance.md` | 当前 | 学生端、后端 | 学生端 V2 基础承接收口记录 |
 
 ## 原始 AI 历史
 

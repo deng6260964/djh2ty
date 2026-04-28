@@ -738,7 +738,7 @@ curl -fsSL https://get.docker.com | sudo sh
 sudo usermod -aG docker ubuntu
 newgrp docker
 
-# 启动 PostgreSQL
+# 启动 PostgreSQL（postgres:16-alpine）
 cd /  # 或 docker-compose.yml 所在目录
 docker-compose up -d
 docker ps  # 确认运行正常

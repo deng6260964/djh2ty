@@ -7,7 +7,7 @@
 
 ## 概述
 
-- 数据库：PostgreSQL 15
+- 数据库：PostgreSQL 16
 - 字符集：UTF-8
 - 时区：Asia/Shanghai（所有 TIMESTAMP 字段存储 UTC，业务层转换）
 - 命名规范：表名和字段名均使用蛇形命名（snake_case）
