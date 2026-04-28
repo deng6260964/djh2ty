@@ -138,6 +138,20 @@ cd student-web
 npm run build
 ```
 
+文档进度检查：
+
+```bash
+node scripts/check-progress.mjs
+```
+
+保存未完成任务断点：
+
+```bash
+node scripts/create-checkpoint.mjs --workstream student-web-v2-rework --owner codex
+```
+
+详细使用说明见 `docs/08-progress/checkpoint-usage.md`。
+
 ## 文档入口
 
 项目文档从 `docs/00-index.md` 开始读。当前老师端 V2 需求和进度优先参考：

@@ -119,6 +119,7 @@ AI 对话、`.specstory/` 历史、截图、临时调查笔记和生成过程材
 | 产品状态或优先级变化 | 更新 `docs/01-product/teacher-v2/status.md` |
 | 老师端实现进度变化 | 更新 `docs/04-implementation/teacher-v2/plan.md` |
 | 负责人、阻塞、当前进行态变化 | 更新 `docs/08-progress/project-status.md` 和相关工作流文档 |
+| 未完成任务需要中断或换人接手 | 运行 `node scripts/create-checkpoint.mjs` 并补齐 `docs/08-progress/checkpoints/` 中的断点快照 |
 | 产品行为或验收标准变化 | 更新当前 PRD 或相关流程文档 |
 | UI / 交互行为变化 | 更新 `docs/02-design/` 下相关文档 |
 | API、数据结构、部署或技术约定变化 | 更新 `docs/03-architecture/` 下相关文档 |
@@ -234,12 +235,14 @@ AI 对话、`.specstory/` 历史、截图、临时调查笔记和生成过程材
 - `docs/08-progress/README.md`
 - `docs/08-progress/project-status.md`
 - `docs/08-progress/workstreams/*.md`
+- `docs/08-progress/checkpoints/YYYY-MM/*.md`
 
 适用情况：
 
 - 多人或多个 agent 并行推进需求、重构、测试或文档治理
 - 负责人、工作流状态、阻塞点、下一步发生变化
 - 一个任务暂时不适合写入完成态变更记录，但需要让接手者知道当前进展
+- 一次对话或一次工作未完成，但用户需要暂停、切换上下文或换人接手
 
 边界：
 
@@ -248,6 +251,20 @@ AI 对话、`.specstory/` 历史、截图、临时调查笔记和生成过程材
 - `docs/07-changes/` 管理“已经完成或确认了什么”
 
 同一事项从计划进入进行态时，应进入进度文档；从进行态变成完成事实时，应沉淀到变更记录和对应事实源。
+
+checkpoint 断点快照由脚本和模型共同完成：
+
+1. 脚本自动采集客观现场：分支、提交、变更文件、diff 统计、最近提交和建议验证命令。
+2. 模型根据当前对话补齐主观上下文：本次目标、已完成、未完成、风险、阻塞和下一步。
+3. 后续恢复时，先读 `docs/08-progress/project-status.md`，再读对应 `docs/08-progress/workstreams/*.md`，最后读最新 open checkpoint。
+4. checkpoint 被恢复后，将 `处理状态` 从 `open` 改为 `resumed`；工作流完成后改为 `closed`。
+
+推荐命令：
+
+```bash
+node scripts/create-checkpoint.mjs --workstream student-web-v2-rework --owner codex
+node scripts/check-progress.mjs
+```
 
 ### 5.9 归档文档
 
@@ -351,6 +368,7 @@ docs/07-changes/template/change-record-template.md
 - 测试用例或验证记录是否需要更新？
 - 是否需要新增一条 `docs/07-changes/` 变更记录？
 - 是否需要更新 `docs/08-progress/` 中的负责人、阻塞或下一步？
+- 当前任务如果未完成，是否需要生成 checkpoint 断点快照？
 - 是否有 AI 会话结论需要沉淀到 `docs/06-ai-worklogs/`？
 - 后续研发是否能不看原始 AI 对话也理解当前状态？
 

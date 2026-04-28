@@ -26,4 +26,5 @@
 
 - 新增并行任务时，在 `docs/08-progress/workstreams/` 新增独立工作流文档。
 - 任何工作流从待开始进入进行中时，应补充负责人、影响范围、验收口径和最近输出。
+- 未完成工作需要中断时，在 `docs/08-progress/checkpoints/` 生成 checkpoint，并保持每个工作流尽量只有一个 open checkpoint。
 - 工作流完成后，应新增或更新 `docs/07-changes/`，并把完成态同步回相关事实源文档。

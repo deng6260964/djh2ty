@@ -27,6 +27,8 @@
 
 - `docs/08-progress/project-status.md`：项目级进度总览，只保留当前进行态和下一步。
 - `docs/08-progress/workstreams/`：多人并行任务流，每个工作流单独一份文档，避免多人同时编辑一个大计划文件。
+- `docs/08-progress/checkpoints/`：一次未完成工作中断前的断点快照，用于下次继续或换人接手。
+- `docs/08-progress/checkpoint-usage.md`：checkpoint 保存、恢复和关闭的使用说明。
 
 ## 更新规则
 
@@ -34,6 +36,7 @@
 - 负责人、状态、风险、下一步、同步输出变化时，更新 `project-status.md` 和相关工作流文档。
 - 工作流完成后，将完成态事实沉淀到 `docs/07-changes/`；如果产品、设计、实现或测试事实变化，也同步更新对应目录。
 - 工作流结束超过一轮迭代且无继续价值时，可以移入 `docs/99-archive/`，并同步更新 `docs/04-implementation/doc-map.md`。
+- 任务未完成但需要中断时，运行 `node scripts/create-checkpoint.mjs` 生成 checkpoint 草稿，并由模型补齐上下文。
 
 ## 多人并行约定
 
@@ -41,3 +44,21 @@
 - 多个研发或 agent 不应长期同时编辑同一个工作流文档；如确需协作，应在文档中拆分子负责人和交接点。
 - 进度同步只记录必要上下文，不粘贴完整 AI 对话。
 - 每次同步至少更新：当前状态、最近输出、阻塞点、下一步。
+
+## 断点快照
+
+checkpoint 用于保存一次未完成工作的中间态。它不是完成态变更记录，也不是完整 AI 对话归档。
+
+触发时机：
+
+- 用户说“暂停一下”“先到这里”“下次继续”“保存现场”。
+- 当前任务已有修改但未完成验证。
+- 多人或多个 agent 并行，现场不记录会影响后续接手。
+- 工作流进入 `阻塞` 或 `待验证`。
+
+推荐流程：
+
+1. 运行 `node scripts/create-checkpoint.mjs --workstream <workstream> --owner <agent-or-user>`。
+2. 模型补齐生成文件中的“本次目标、已完成、未完成、风险与阻塞、下一步”。
+3. 必要时更新 `docs/08-progress/project-status.md` 或对应工作流文档。
+4. 运行 `node scripts/check-progress.mjs`。
