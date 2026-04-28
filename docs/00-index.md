@@ -9,6 +9,7 @@
 ## 从这里开始
 
 - `docs/04-implementation/documentation-workflow.md` — 文档归集规则、检索顺序、vibecoding 工作流和交接清单
+- `docs/04-implementation/development-usage-guide.md` — 本项目对 `ai-coding-workflow` 和 `document-governance-workflow` 两个通用 skill 的适配说明
 - `docs/04-implementation/doc-map.md` — 项目自有 Markdown 文档地图，列出每份文档的状态和用途
 - `docs/08-progress/project-status.md` — 当前进行态、并行工作流和下一步同步入口
 - `docs/07-changes/README.md` — 变更记录目录说明
@@ -62,6 +63,10 @@ docs/
 多人并行开发、重构或测试刷新时，当前进行态统一记录到 `docs/08-progress/`。项目级总览见 `docs/08-progress/project-status.md`，具体工作流见 `docs/08-progress/workstreams/`。
 
 `docs/04-implementation/` 说明怎么做，`docs/08-progress/` 说明当前做到哪里，`docs/07-changes/` 说明已经确认或完成了什么。
+
+如果任务未完成但需要暂停、下次继续或换人接手，使用 `docs/08-progress/checkpoints/` 保存断点快照。
+
+checkpoint 使用说明见 `docs/08-progress/checkpoint-usage.md`。
 
 ## 变更记录
 

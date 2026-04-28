@@ -16,9 +16,30 @@
 
 文档归集、查找顺序和 vibecoding 后的文档收口流程见：
 - `docs/00-index.md`
+- `docs/04-implementation/development-usage-guide.md`
 - `docs/04-implementation/documentation-workflow.md`
 - `docs/04-implementation/doc-map.md`
 - `docs/08-progress/project-status.md`
+
+## AI 编码工作流适配
+
+本项目执行本地通用技能：
+
+- `ai-coding-workflow`：用于开发、修复、重构、性能定位、测试刷新和代码改动。
+- `document-governance-workflow`：用于创建、更新、归档、整理文档，维护变更记录、进度记录、checkpoint 和文档地图。
+
+使用 Claude Code 处理开发、修复、重构、测试刷新和文档治理时，先按对应 skill 进行任务分级、最小上下文读取、Phase/Gate 控制、验证和交接；再结合本文的当前基线、项目结构、命令、测试策略和文档沉淀规则执行。
+
+本项目适配说明见：`docs/04-implementation/development-usage-guide.md`。
+
+本项目的最小启动上下文为：
+
+- `docs/00-index.md`
+- `docs/01-product/current.md`
+- `docs/01-product/teacher-v2/status.md`
+- `docs/08-progress/project-status.md`
+
+本项目的高风险业务包括：课程状态流转、自动扣费、充值、余额回滚、批量复制课程、鉴权、删除和跨端学生信息展示。涉及这些内容时，至少按通用工作流中的 L 级任务处理。
 
 优先参考这些文档：
 - `docs/01-product/current.md` — 当前产品基线入口
@@ -27,6 +48,15 @@
 - `docs/02-design/teacher-v2/prototype.md` — 当前老师端原型基线
 - `docs/04-implementation/teacher-v2/plan.md` — 当前实现拆解和阶段状态
 - `docs/08-progress/project-status.md` — 当前进行态和多人并行工作流
+
+如果任务未完成但需要暂停、换人接手或下次继续，生成 checkpoint 断点快照：
+
+```bash
+node scripts/create-checkpoint.mjs --workstream <workstream> --owner claude
+node scripts/check-progress.mjs
+```
+
+checkpoint 生成后，应根据当前对话补齐本次目标、已完成、未完成、风险与下一步。
 
 旧文档 `docs/99-archive/legacy/product/prd-v1.md`、`docs/99-archive/legacy/design/web-wireframes-v1.md` 仅用于历史对照，不应作为新改动的默认依据。
 

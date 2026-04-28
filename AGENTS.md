@@ -17,6 +17,26 @@
 
 旧文档如 `docs/99-archive/legacy/product/prd-v1.md`、`docs/99-archive/legacy/design/web-wireframes-v1.md` 仅用于历史对照。
 
+## AI 编码工作流适配
+
+本项目执行本地通用技能：
+
+- `ai-coding-workflow`：用于开发、修复、重构、性能定位、测试刷新和代码改动。
+- `document-governance-workflow`：用于创建、更新、归档、整理文档，维护变更记录、进度记录、checkpoint 和文档地图。
+
+开发、修复、重构、测试刷新和文档治理时，先按对应 skill 进行任务分级、最小上下文读取、Phase/Gate 控制、验证和交接；再结合本文件中的当前基线、项目结构、测试命令和文档卫生规则执行。
+
+本项目适配说明见：`docs/04-implementation/development-usage-guide.md`。
+
+本项目的最小启动上下文为：
+
+- `docs/00-index.md`
+- `docs/01-product/current.md`
+- `docs/01-product/teacher-v2/status.md`
+- `docs/08-progress/project-status.md`
+
+本项目的高风险业务包括：课程状态流转、自动扣费、充值、余额回滚、批量复制课程、鉴权、删除和跨端学生信息展示。涉及这些内容时，至少按通用工作流中的 L 级任务处理。
+
 ## 项目结构与模块组织
 
 本仓库按客户端和服务端拆分：
@@ -117,6 +137,12 @@ PR 描述应包含：
 
 - `docs/08-progress/project-status.md`
 - `docs/08-progress/workstreams/`
+
+任务未完成但需要暂停、换人接手或下次继续时，应生成 checkpoint 断点快照：
+
+- 运行 `node scripts/create-checkpoint.mjs --workstream <workstream> --owner <agent-or-user>`
+- 由模型补齐本次目标、已完成、未完成、风险与下一步
+- 运行 `node scripts/check-progress.mjs`
 
 旧文档优先标记为历史文档，不要轻易删除，除非它们明显是无用文件或已被生成物替代。
 
