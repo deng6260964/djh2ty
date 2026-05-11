@@ -618,13 +618,18 @@ class TestTeacherV2AccountCourseFlow:
             headers=auth_headers,
         )
 
+        course_start = datetime.now() + timedelta(days=1)
         course_resp = await async_client.post(
             "/api/courses",
             json={
                 "student_id": student_id,
                 "subject": "英语",
-                "start_time": "2026-05-12T18:00:00",
-                "end_time": "2026-05-12T19:30:00",
+                "start_time": course_start.replace(
+                    hour=18, minute=0, second=0, microsecond=0
+                ).isoformat(),
+                "end_time": course_start.replace(
+                    hour=19, minute=30, second=0, microsecond=0
+                ).isoformat(),
             },
             headers=auth_headers,
         )
@@ -653,7 +658,9 @@ class TestTeacherV2AccountCourseFlow:
                     "enabled": True,
                     "title": "一般过去时巩固",
                     "content": "完成讲义第 3 页练习",
-                    "due_date": "2026-05-14",
+                    "due_date": (
+                        course_start + timedelta(days=2)
+                    ).date().isoformat(),
                 },
             },
             headers=auth_headers,
@@ -709,13 +716,18 @@ class TestTeacherV2AccountCourseFlow:
         assert student_resp.status_code == 201, student_resp.text
         student_id = student_resp.json()["id"]
 
+        course_start = datetime.now() + timedelta(days=1)
         course_resp = await async_client.post(
             "/api/courses",
             json={
                 "student_id": student_id,
                 "subject": "数学",
-                "start_time": "2026-05-13T19:00:00",
-                "end_time": "2026-05-13T20:30:00",
+                "start_time": course_start.replace(
+                    hour=19, minute=0, second=0, microsecond=0
+                ).isoformat(),
+                "end_time": course_start.replace(
+                    hour=20, minute=30, second=0, microsecond=0
+                ).isoformat(),
             },
             headers=auth_headers,
         )
@@ -739,12 +751,17 @@ class TestTeacherV2AccountCourseFlow:
         pool_items = pool_resp.json()["items"]
         assert any(item["id"] == course_id for item in pool_items)
 
+        makeup_start = course_start + timedelta(days=2)
         makeup_resp = await async_client.post(
             f"/api/courses/{course_id}/makeup",
             json={
-                "start_time": "2026-05-15T19:00:00",
-                "end_time": "2026-05-15T20:30:00",
-                "notes": "补上 5 月 13 日请假课程",
+                "start_time": makeup_start.replace(
+                    hour=19, minute=0, second=0, microsecond=0
+                ).isoformat(),
+                "end_time": makeup_start.replace(
+                    hour=20, minute=30, second=0, microsecond=0
+                ).isoformat(),
+                "notes": "补上请假课程",
             },
             headers=auth_headers,
         )

@@ -11,6 +11,7 @@
 | 目录 | 内容 |
 | --- | --- |
 | `backend/` | 后端 pytest 覆盖报告、API 测试清单和已知限制 |
+| `bugfix-records/` | 缺陷修复与测试失败闭环记录 |
 | `browser-use/` | 管理端 browser-use 集成测试用例和验证记录 |
 
 ## 当前测试文档
@@ -19,6 +20,7 @@
 | --- | --- | --- |
 | `testing-workflow.md` | 当前 | 测试流程指南，覆盖用例编写、执行动作、失败处理和文档归集 |
 | `backend/test-report.md` | 参考 | 后端自动化测试覆盖快照，真实结果以最新本地 `pytest` 为准 |
+| `bugfix-records/2026-05-11-tdd-bugfix-workflow-validation.md` | 当前 | TDD 缺陷修复工作流在当前项目上的试运行记录 |
 | `browser-use/README.md` | 当前 | browser-use 用例目录说明 |
 | `browser-use/dashboard-workbench.spec.md` | 当前 | 老师工作台专项集成测试用例 |
 | `browser-use/dashboard-workbench.verification.md` | 参考 | 工作台专项验证记录 |

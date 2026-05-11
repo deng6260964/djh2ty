@@ -72,6 +72,7 @@
 | `docs/05-testing/README.md` | 当前 | 全项目 | 测试文档统一入口 |
 | `docs/05-testing/testing-workflow.md` | 当前 | 全项目 | 测试流程指南，覆盖用例编写、执行动作、失败处理和文档归集 |
 | `docs/05-testing/backend/test-report.md` | 参考 | 后端 | 后端测试覆盖快照 |
+| `docs/05-testing/bugfix-records/2026-05-11-tdd-bugfix-workflow-validation.md` | 当前 | 后端、测试 | TDD 缺陷修复工作流在当前项目上的试运行记录 |
 | `docs/05-testing/browser-use/README.md` | 当前 | 管理端 | browser-use 集成测试目录入口 |
 | `docs/05-testing/browser-use/dashboard-workbench.spec.md` | 当前 | 管理端 | 老师工作台专项集成测试用例 |
 | `docs/05-testing/browser-use/full-regression.spec.md` | 当前 | 管理端 | 老师端 V2 全量回归测试用例 |

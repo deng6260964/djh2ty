@@ -3,7 +3,7 @@
 覆盖用户故事 US-501 ~ US-505
 """
 import pytest
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -256,11 +256,12 @@ class TestBillingRecords:
         await db.flush()
         test_student.user_id = student_user.id
 
+        next_course_start = datetime.now() + timedelta(days=1)
         course = Course(
             student_id=test_student.id,
             subject="数学",
-            start_time=datetime(2026, 5, 6, 10, 0),
-            end_time=datetime(2026, 5, 6, 11, 30),
+            start_time=next_course_start,
+            end_time=next_course_start + timedelta(minutes=90),
             duration=90,
             status="scheduled",
             hourly_rate=150.0,
